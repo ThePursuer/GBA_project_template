@@ -22,6 +22,16 @@
             },
             "dependsOn": ["cmake"],
             "problemMatcher": []
+        },
+		{
+            "label": "clean_project",
+            "type": "shell",
+            "command": "make clean",
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+            "dependsOn": ["cmake"],
+            "problemMatcher": []
         }
 	]
 }

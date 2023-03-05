@@ -1,19 +1,18 @@
 # Add all .c files in the src directory to the executable target
-file(GLOB SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
-set(TARGET_NAME my_gba_program.gba)
-add_executable(${TARGET_NAME} ${SOURCES})
+file(GLOB SOURCES *.c **/*.c)
+add_executable(my_gba_executable ${SOURCES})
 
 # Add the GBA include directory and library directory to the include path
-target_include_directories(${TARGET_NAME} PRIVATE
+target_include_directories(my_gba_executable PRIVATE
   "${DEVKITPRO_PATH}/libgba/include"
   "${DEVKITPRO_PATH}/libgba/lib"
 )
 
 # Set the linker directories for devkitPro
-target_link_libraries(${TARGET_NAME} PRIVATE gba)
+target_link_libraries(my_gba_executable PRIVATE gba)
 
 # Compile with the appropriate flags for the GBA
-target_compile_options(${TARGET_NAME} PRIVATE
+target_compile_options(my_gba_executable PRIVATE
   -mthumb
   -mthumb-interwork
   -marm
@@ -24,7 +23,7 @@ target_compile_options(${TARGET_NAME} PRIVATE
 )
 
 # Link the objects into an ELF file
-target_link_options(${TARGET_NAME} PRIVATE
+target_link_options(my_gba_executable PRIVATE
   -specs=gba.specs
   -mthumb
   -mthumb-interwork
@@ -33,12 +32,16 @@ target_link_options(${TARGET_NAME} PRIVATE
   -Wl,-Map=output.map
 )
 
-set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
-
 # Use objcopy to create the .gba file
-add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+add_custom_command(TARGET my_gba_executable POST_BUILD
   COMMAND ${DEVKITPRO_PATH}/devkitARM/bin/arm-none-eabi-objcopy.exe
           -O binary
-          $<TARGET_FILE:${TARGET_NAME}>
-          my_gba_file.gba
+          $<TARGET_FILE:my_gba_executable>
+          ${CMAKE_SOURCE_DIR}/bin/my_gba_file.gba
+)
+
+set_property(
+  TARGET my_gba_executable
+  APPEND
+  PROPERTY ADDITIONAL_CLEAN_FILES ${CMAKE_SOURCE_DIR}/bin/my_gba_file.gba
 )
