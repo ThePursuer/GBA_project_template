@@ -1,0 +1,10 @@
+{
+    "terminal.integrated.profiles.windows": {
+        "msys2": {
+            "path": "C:\\devkitPro\\msys2\\usr\\bin\\bash.exe"
+        }
+    },
+    "terminal.integrated.defaultProfile.windows": "msys2",
+    "cmake.buildBeforeRun": false,
+    "cmake.configureOnEdit": false
+}

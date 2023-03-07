@@ -2,34 +2,37 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "cmake",
-			"label": "CMake: build",
-			"command": "build",
-			"targets": [
-				"all"
+			"type": "shell",
+			"label": "Run cmake",
+			"command": "cmake",
+			"args": [
+				".", "-B", "build"
 			],
-            "dependsOn": ["create_build_directory"], // Not really but we need it for build_gba_project
 			"group": "build",
 			"problemMatcher": [],
-			"detail": "CMake template build task"
+			"detail": "CMake build task",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			}
 		},
 		{
-            "label": "build_gba_project",
+            "label": "Compile GBA Project",
             "type": "shell",
             "command": "make",
             "options": {
                 "cwd": "${workspaceFolder}/build"
             },
-            "dependsOn": ["cmake"],
+			"group": "build",
             "problemMatcher": []
         },
 		{
-            "label": "clean_project",
+            "label": "Clean GBA Project",
             "type": "shell",
             "command": "make clean",
             "options": {
                 "cwd": "${workspaceFolder}/build"
             },
+			"group": "build",
             "dependsOn": ["cmake"],
             "problemMatcher": []
         }

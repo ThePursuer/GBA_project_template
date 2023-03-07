@@ -2,14 +2,10 @@
 file(GLOB SOURCES *.c **/*.c)
 add_executable(my_gba_executable ${SOURCES})
 
-# Add the GBA include directory and library directory to the include path
-target_include_directories(my_gba_executable PRIVATE
-  "${DEVKITPRO_PATH}/libgba/include"
-  "${DEVKITPRO_PATH}/libgba/lib"
-)
+target_include_directories(my_gba_executable PRIVATE ${DEVKITPRO}/libgba/include) # Why doesn't this work???
 
 # Set the linker directories for devkitPro
-target_link_libraries(my_gba_executable PRIVATE gba)
+target_link_libraries(my_gba_executable PRIVATE ${DEVKITPRO}/libgba/lib/libgba.a)
 
 # Compile with the appropriate flags for the GBA
 target_compile_options(my_gba_executable PRIVATE
@@ -34,7 +30,7 @@ target_link_options(my_gba_executable PRIVATE
 
 # Use objcopy to create the .gba file
 add_custom_command(TARGET my_gba_executable POST_BUILD
-  COMMAND ${DEVKITPRO_PATH}/devkitARM/bin/arm-none-eabi-objcopy.exe
+  COMMAND ${DEVKITPRO}/devkitARM/bin/arm-none-eabi-objcopy.exe
           -O binary
           $<TARGET_FILE:my_gba_executable>
           ${CMAKE_SOURCE_DIR}/bin/my_gba_file.gba
