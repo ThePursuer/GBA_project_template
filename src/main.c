@@ -8,7 +8,7 @@ int main(void)
 
     consoleDemoInit();
 
-    iprintf("Hello, ME!");
+    iprintf("Hello, world!");
 
     while (1)
     {
