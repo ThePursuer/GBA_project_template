@@ -4,7 +4,8 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:\\devkitPro\\libgba\\include"
+                "C:\\devkitPro\\libgba\\include",
+                "C:\\devkitPro\\devkitARM\\lib\\gcc\\arm-none-eabi\\12.2.0\\include"
             ],
             "defines": [
                 "_DEBUG",
