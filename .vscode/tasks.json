@@ -2,6 +2,17 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+            "label": "Clean cmake",
+            "type": "shell",
+            "command": "rm",
+			"args": ["-r", "-f", "build/"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+			"group": "build",
+            "problemMatcher": []
+		},
+		{
 			"type": "shell",
 			"label": "Run cmake",
 			"command": "cmake",
@@ -13,7 +24,8 @@
 			"detail": "CMake build task",
 			"options": {
 				"cwd": "${workspaceFolder}"
-			}
+			},
+			"dependsOn": "Clean cmake"
 		},
 		{
             "label": "Compile GBA Project",
