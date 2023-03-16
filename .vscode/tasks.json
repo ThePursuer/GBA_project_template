@@ -35,7 +35,8 @@
                 "cwd": "${workspaceFolder}/build"
             },
 			"group": "build",
-            "problemMatcher": []
+            "problemMatcher": [],
+			"dependsOn": "Clean GBA Project"
         },
 		{
             "label": "Clean GBA Project",
