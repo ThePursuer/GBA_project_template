@@ -13,20 +13,23 @@ void InputHandler::update() {
 }
 
 void InputHandler::handleEvents(u16 keys_down, u16 keys_up, u16 keys_held) {
-    // Handle ButtonPressed and ButtonReleased events
+    // Handle ButtonPressed, ButtonReleased, and ButtonHeld events
     for (const auto& pair : events[EventType::ButtonPressed]) {
         if (keys_down & pair.first) pair.second();
     }
     for (const auto& pair : events[EventType::ButtonReleased]) {
         if (keys_up & pair.first) pair.second();
     }
+    for (const auto& pair : events[EventType::ButtonHeld]) {
+        if (keys_held & pair.first) pair.second();
+    }
 
-    // Handle ButtonHeld and ButtonDoubleTap events
+    // Handle ButtonHeld300Ms and ButtonDoubleTap events
     using Clock = GbaClock;
     static std::map<u32, Clock::time_point> keyTimestamps;
     static std::map<u32, bool> keyTapped;
 
-    for (const auto& pair : events[EventType::ButtonHeld]) {
+    for (const auto& pair : events[EventType::ButtonHeld300Ms]) {
         if (keys_held & pair.first) {
             auto& timestamp = keyTimestamps[pair.first];
             auto now = Clock::instance().now();

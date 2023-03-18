@@ -16,6 +16,7 @@ public:
         ButtonPressed,
         ButtonReleased,
         ButtonHeld,
+        ButtonHeld300Ms,
         ButtonDoubleTap
     };
 

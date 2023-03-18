@@ -7,13 +7,41 @@
 #include <stdio.h>
 #include "engine/Input/InputHandler.h"
 
-GbaClock::time_point start;
+#include "Sprites/wizard_spritesheet_calciumtrice_indexed.h"
 
-void showHelloWorld() {
-    auto p = GbaClock::instance().now() - start;
-    
-    iprintf("%i\n", std::chrono::duration_cast<gba_milliseconds>(p).count());
+#include "engine/Actor/Actor.h"
+#include "engine/Graphics/Sprite.h"
+
+Sprite * player_sprite;
+Actor * player_;
+
+void moveup() {
+    player_->setPosition(player_->getX(), player_->getY() - 1);
+    player_->playAnimation(1, true);
 }
+void movedown() {
+    player_->setPosition(player_->getX(), player_->getY() + 1);
+    player_->playAnimation(1, true);
+}
+void moveleft() {
+    player_->setPosition(player_->getX() - 1, player_->getY());
+    player_->playAnimation(1, true);
+}
+void moveright() {
+    player_->setPosition(player_->getX() + 1, player_->getY());
+    player_->playAnimation(1, true);
+}
+void turnLeft(){
+    player_sprite->flipX(1);
+}
+void turnRight(){
+    player_sprite->flipX(0);
+}
+void setIdle(){
+    player_->playAnimation(0, true);
+}
+
+
 
 int main() {
     // Set the timer frequency (16.38 kHz) and enable the timer
@@ -22,19 +50,67 @@ int main() {
     // Initialize GBA and devkitPro libraries
     irqInit();
     irqEnable(IRQ_VBLANK);
-    consoleDemoInit();
-    start = GbaClock::instance().now();
 
-    
+    // Set up the video mode and enable sprites
+    SetMode(MODE_0 | OBJ_ENABLE | OBJ_1D_MAP);
+
+    CpuFastSet(wizard_spritesheet_calciumtrice_indexedPal, SPRITE_PALETTE, wizard_spritesheet_calciumtrice_indexedPalLen / 4);
+    CpuFastSet(wizard_spritesheet_calciumtrice_indexedTiles, SPRITE_GFX + 16, wizard_spritesheet_calciumtrice_indexedTilesLen / 4);
+
+    player_sprite = new Sprite(ATTR0_COLOR_16 | ATTR0_NORMAL | ATTR0_SQUARE,
+        ATTR1_SIZE_32,
+        ATTR2_PRIORITY(0) | ATTR2_PALETTE(0),
+        2
+    );
+    player_sprite->setGFXIndex(1);
+    Actor player(player_sprite);
+    player_ = &player;
+    player.setPosition(80, 60);
+
+    auto clock = GbaClock::instance();
+
+    // create animation sequence
+    {
+        std::vector<u32> idle;
+        for(auto i = 0; i < 10; i++)
+            idle.push_back(1 + i * 16);
+        player.addAnimation(0, std::move(idle), gba_milliseconds(200));
+
+        //add walk anim
+        std::vector<u32> walk;
+        for(auto i = 20; i < 30; i++)
+            walk.push_back(1 + i * 16);
+        player.addAnimation(1, std::move(walk), gba_milliseconds(100));
+    }
+
+    // player.setStopAnimCallback([&player]{player.playAnimation(0, true);});
+    player.playAnimation(0, true);
+
     // Initialize InputHandler
     InputHandler inputHandler;
-    inputHandler.registerEvent(InputHandler::EventType::ButtonDoubleTap, KEY_A, showHelloWorld);
-    
+    inputHandler.registerEvent(InputHandler::EventType::ButtonHeld, KEY_UP, moveup);
+    inputHandler.registerEvent(InputHandler::EventType::ButtonHeld, KEY_DOWN, movedown);
+    inputHandler.registerEvent(InputHandler::EventType::ButtonHeld, KEY_LEFT, moveleft);
+    inputHandler.registerEvent(InputHandler::EventType::ButtonHeld, KEY_RIGHT, moveright);
+
+    inputHandler.registerEvent(InputHandler::EventType::ButtonReleased, KEY_UP, setIdle);
+    inputHandler.registerEvent(InputHandler::EventType::ButtonReleased, KEY_DOWN, setIdle);
+    inputHandler.registerEvent(InputHandler::EventType::ButtonReleased, KEY_LEFT, setIdle);
+    inputHandler.registerEvent(InputHandler::EventType::ButtonReleased, KEY_RIGHT, setIdle);
+
+    inputHandler.registerEvent(InputHandler::EventType::ButtonPressed, KEY_LEFT, turnLeft);
+    inputHandler.registerEvent(InputHandler::EventType::ButtonPressed, KEY_RIGHT, turnRight);
+
+    u32 count = 0;
     // Main game loop
+    auto last_fram_time = clock.now();
     while (1) {
+        count++;
         // Update InputHandler
         inputHandler.update();
+        player.update(std::chrono::duration_cast<gba_milliseconds>(clock.now() - last_fram_time));
 
+        last_fram_time = clock.now();
         // Wait for VBlank to avoid screen tearing
         VBlankIntrWait();
     }
