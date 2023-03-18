@@ -1,6 +1,5 @@
 #include "engine/Actor/Actor.h"
 
-
 Actor::Actor(Sprite* sprite)
     : sprite_(sprite),
       currentAnimation(UINT32_MAX),
@@ -64,9 +63,10 @@ void Actor::playAnimation(AnimationName name, bool loop) {
 
 void Actor::stopAnimation() {
     isAnimating_ = false;
-    loopAnimation = false;
     animationTime = gba_milliseconds::zero();
     currentFrameIndex = 0;
+    if (loopAnimation)
+        loopAnimation = false;
     stopAnimCallback();
 }
 

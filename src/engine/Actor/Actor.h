@@ -5,6 +5,7 @@
 #include <map>
 #include <chrono>
 #include <functional>
+#include <atomic>
 
 #include "engine/Graphics/Sprite.h"
 #include "engine/Clock/GbaClock.h"
@@ -44,6 +45,7 @@ protected:
     Sprite* sprite_; // Pointer to the Sprite object representing this actor
     bool isAnimating_ = false;
     bool should_update_sprite_ = false;
+    std::atomic<bool> isUpdating_;
 
     std::map<AnimationName, std::vector<u32>> animations; // Map of animation sequences
     std::map<AnimationName, gba_milliseconds> frameDurations; // Map of frame durations for each animation sequence

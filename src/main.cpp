@@ -5,31 +5,38 @@
 #include <gba_systemcalls.h>
 #include <gba_input.h>
 #include <stdio.h>
-#include "engine/Input/InputHandler.h"
 
 #include "Sprites/wizard_spritesheet_calciumtrice_indexed.h"
 
 #include "engine/Actor/Actor.h"
 #include "engine/Graphics/Sprite.h"
+#include "engine/Input/InputHandler.h"
 
 Sprite * player_sprite;
 Actor * player_;
 
-void moveup() {
+enum PLAYER_ANIMATIONS{
+    IDLE,
+    WALK,
+    FIRE
+};
+
+// Input callbacks
+void moveUp() {
     player_->setPosition(player_->getX(), player_->getY() - 1);
-    player_->playAnimation(1, true);
+    player_->playAnimation(WALK, true);
 }
-void movedown() {
+void moveDown() {
     player_->setPosition(player_->getX(), player_->getY() + 1);
-    player_->playAnimation(1, true);
+    player_->playAnimation(WALK, true);
 }
-void moveleft() {
+void moveLeft() {
     player_->setPosition(player_->getX() - 1, player_->getY());
-    player_->playAnimation(1, true);
+    player_->playAnimation(WALK, true);
 }
-void moveright() {
+void moveRight() {
     player_->setPosition(player_->getX() + 1, player_->getY());
-    player_->playAnimation(1, true);
+    player_->playAnimation(WALK, true);
 }
 void turnLeft(){
     player_sprite->flipX(1);
@@ -38,9 +45,11 @@ void turnRight(){
     player_sprite->flipX(0);
 }
 void setIdle(){
-    player_->playAnimation(0, true);
+    player_->playAnimation(IDLE, true);
 }
-
+void fireWand(){
+    player_->playAnimation(FIRE, false);
+}
 
 
 int main() {
@@ -74,24 +83,30 @@ int main() {
         std::vector<u32> idle;
         for(auto i = 0; i < 10; i++)
             idle.push_back(1 + i * 16);
-        player.addAnimation(0, std::move(idle), gba_milliseconds(200));
+        player.addAnimation(IDLE, std::move(idle), gba_milliseconds(200));
 
         //add walk anim
         std::vector<u32> walk;
         for(auto i = 20; i < 30; i++)
             walk.push_back(1 + i * 16);
-        player.addAnimation(1, std::move(walk), gba_milliseconds(100));
+        player.addAnimation(WALK, std::move(walk), gba_milliseconds(100));
+
+        // add  fire animation
+        std::vector<u32> fire;
+        for(auto i = 30; i < 40; i++)
+            fire.push_back(1 + i * 16);
+        player.addAnimation(FIRE, std::move(fire), gba_milliseconds(100));
     }
 
-    // player.setStopAnimCallback([&player]{player.playAnimation(0, true);});
+    player.setStopAnimCallback(setIdle);
     player.playAnimation(0, true);
 
     // Initialize InputHandler
     InputHandler inputHandler;
-    inputHandler.registerEvent(InputHandler::EventType::ButtonHeld, KEY_UP, moveup);
-    inputHandler.registerEvent(InputHandler::EventType::ButtonHeld, KEY_DOWN, movedown);
-    inputHandler.registerEvent(InputHandler::EventType::ButtonHeld, KEY_LEFT, moveleft);
-    inputHandler.registerEvent(InputHandler::EventType::ButtonHeld, KEY_RIGHT, moveright);
+    inputHandler.registerEvent(InputHandler::EventType::ButtonHeld, KEY_UP, moveUp);
+    inputHandler.registerEvent(InputHandler::EventType::ButtonHeld, KEY_DOWN, moveDown);
+    inputHandler.registerEvent(InputHandler::EventType::ButtonHeld, KEY_LEFT, moveLeft);
+    inputHandler.registerEvent(InputHandler::EventType::ButtonHeld, KEY_RIGHT, moveRight);
 
     inputHandler.registerEvent(InputHandler::EventType::ButtonReleased, KEY_UP, setIdle);
     inputHandler.registerEvent(InputHandler::EventType::ButtonReleased, KEY_DOWN, setIdle);
@@ -100,6 +115,8 @@ int main() {
 
     inputHandler.registerEvent(InputHandler::EventType::ButtonPressed, KEY_LEFT, turnLeft);
     inputHandler.registerEvent(InputHandler::EventType::ButtonPressed, KEY_RIGHT, turnRight);
+
+    inputHandler.registerEvent(InputHandler::EventType::ButtonPressed, KEY_A, fireWand);
 
     u32 count = 0;
     // Main game loop
