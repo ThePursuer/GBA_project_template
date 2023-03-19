@@ -31,6 +31,7 @@ void Actor::update(gba_milliseconds deltaTime) {
                 animationTime = gba_milliseconds::zero();
             } else {
                 stopAnimation();
+                return;
             }
         }
 
@@ -63,13 +64,28 @@ void Actor::playAnimation(AnimationName name, bool loop) {
 
 void Actor::stopAnimation() {
     isAnimating_ = false;
-    animationTime = gba_milliseconds::zero();
-    currentFrameIndex = 0;
-    if (loopAnimation)
-        loopAnimation = false;
     stopAnimCallback();
 }
 
 bool Actor::isAnimating() const {
     return isAnimating_;
+}
+
+void Actor::attachCollider(std::unique_ptr<Collider> collider) {
+    collider_ = std::move(collider);
+}
+
+void Actor::detachCollider() {
+    collider_.reset();
+}
+
+bool Actor::hasCollider() const {
+    return static_cast<bool>(collider_);
+}
+
+bool Actor::checkCollision(const Actor& other) const {
+    if (hasCollider() && other.hasCollider()) {
+        return collider_->collidesWith(*(other.collider_));
+    }
+    return false;
 }

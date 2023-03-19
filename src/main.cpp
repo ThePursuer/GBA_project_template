@@ -11,6 +11,8 @@
 #include "engine/Actor/Actor.h"
 #include "engine/Graphics/Sprite.h"
 #include "engine/Input/InputHandler.h"
+#include "engine/Math/Collider.h"
+#include "engine/Math/ColliderI.h"
 
 Sprite * player_sprite;
 Actor * player_;
@@ -18,7 +20,8 @@ Actor * player_;
 enum PLAYER_ANIMATIONS{
     IDLE,
     WALK,
-    FIRE
+    FIRE,
+    DIE
 };
 
 // Input callbacks
@@ -49,6 +52,9 @@ void setIdle(){
 }
 void fireWand(){
     player_->playAnimation(FIRE, false);
+}
+void die(){
+    player_->playAnimation(DIE, false);
 }
 
 
@@ -96,10 +102,16 @@ int main() {
         for(auto i = 30; i < 40; i++)
             fire.push_back(1 + i * 16);
         player.addAnimation(FIRE, std::move(fire), gba_milliseconds(100));
+
+        // add  death animation
+        std::vector<u32> death;
+        for(auto i = 40; i < 50; i++)
+            death.push_back(1 + i * 16);
+        player.addAnimation(DIE, std::move(death), gba_milliseconds(100));
     }
 
-    player.setStopAnimCallback(setIdle);
     player.playAnimation(0, true);
+    player.setStopAnimCallback(setIdle);
 
     // Initialize InputHandler
     InputHandler inputHandler;
@@ -117,6 +129,44 @@ int main() {
     inputHandler.registerEvent(InputHandler::EventType::ButtonPressed, KEY_RIGHT, turnRight);
 
     inputHandler.registerEvent(InputHandler::EventType::ButtonPressed, KEY_A, fireWand);
+    inputHandler.registerEvent(InputHandler::EventType::ButtonPressed, KEY_B, die);
+
+    Sprite *enemy_sprite = new Sprite(ATTR0_COLOR_16 | ATTR0_NORMAL | ATTR0_SQUARE,
+        ATTR1_SIZE_32,
+        ATTR2_PRIORITY(0) | ATTR2_PALETTE(0),
+        3
+    );
+    enemy_sprite->setGFXIndex(1);
+    Actor enemy(enemy_sprite);    // create animation sequence
+    {
+        std::vector<u32> idle;
+        for(auto i = 0; i < 10; i++)
+            idle.push_back(1 + i * 16);
+        enemy.addAnimation(IDLE, std::move(idle), gba_milliseconds(200));
+
+        //add walk anim
+        std::vector<u32> walk;
+        for(auto i = 20; i < 30; i++)
+            walk.push_back(1 + i * 16);
+        enemy.addAnimation(WALK, std::move(walk), gba_milliseconds(100));
+
+        // add  fire animation
+        std::vector<u32> fire;
+        for(auto i = 30; i < 40; i++)
+            fire.push_back(1 + i * 16);
+        enemy.addAnimation(FIRE, std::move(fire), gba_milliseconds(100));
+
+        // add  death animation
+        std::vector<u32> death;
+        for(auto i = 40; i < 50; i++)
+            death.push_back(1 + i * 16);
+        enemy.addAnimation(DIE, std::move(death), gba_milliseconds(100));
+    }
+    enemy.setPosition(0, 0);
+    enemy.playAnimation(IDLE, true);
+    
+    player.attachCollider(std::make_unique<Rectangle>(0, 0, 32, 32, player));
+    enemy.attachCollider(std::make_unique<Rectangle>(0, 0, 32, 32, enemy));
 
     u32 count = 0;
     // Main game loop
@@ -126,6 +176,10 @@ int main() {
         // Update InputHandler
         inputHandler.update();
         player.update(std::chrono::duration_cast<gba_milliseconds>(clock.now() - last_fram_time));
+        enemy.update(std::chrono::duration_cast<gba_milliseconds>(clock.now() - last_fram_time));
+
+        if (player.checkCollision(enemy))
+            enemy.playAnimation(DIE, false);
 
         last_fram_time = clock.now();
         // Wait for VBlank to avoid screen tearing
