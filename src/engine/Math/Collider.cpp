@@ -72,6 +72,15 @@ bool Rectangle::collidesWith(const Collider& other) const {
     return false;
 }
 
+std::vector<Vector2> Rectangle::getVertices() const {
+    return {
+        Vector2(x_, y_),
+        Vector2(x_ + width_, y_),
+        Vector2(x_ + width_, y_ + height_),
+        Vector2(x_, y_ + height_) 
+    };
+}
+
 bool Rectangle::collidesWithCircle(const Circle& circle) const {
     return circle.collidesWith(*this);
 }
@@ -129,15 +138,9 @@ bool ConvexPolygon::collidesWithCircle(const Circle& circle) const {
 
 bool ConvexPolygon::collidesWithRectangle(const Rectangle& rectangle) const {
     // Convert the rectangle to a polygon
-    std::vector<Vector2> rectVertices = {
-        Vector2(rectangle.x(), rectangle.y()),
-        Vector2(rectangle.x() + rectangle.width(), rectangle.y()),
-        Vector2(rectangle.x() + rectangle.width(), rectangle.y() + rectangle.height()),
-        Vector2(rectangle.x(), rectangle.y() + rectangle.height())
-    };
-    ConvexPolygon rectPolygon(rectVertices, rectangle.actor());
+    ConvexPolygon rectPolygon(rectangle.getVertices(), rectangle.actor());
 
-    // Check for collisions between the two polygons
+    // Check for collisions between the two polygons using the collidesWithPolygon function
     return collidesWithPolygon(rectPolygon);
 }
 
@@ -165,7 +168,10 @@ bool ConvexPolygon::isSeparatingAxis(const Vector2& axis, const ConvexPolygon& p
     polygonA.projectOntoAxis(axis, minA, maxA);
     polygonB.projectOntoAxis(axis, minB, maxB);
 
-    return (minB > maxA) || (minA > maxB);
+    // Use an epsilon to account for rounding errors
+    s32 epsilon = 0;  // You can experiment with different values to find the best one for your use case
+
+    return (minB > maxA + epsilon) || (minA > maxB + epsilon);
 }
 
 void ConvexPolygon::projectOntoAxis(const Vector2& axis, s32& min, s32& max) const {
@@ -173,7 +179,8 @@ void ConvexPolygon::projectOntoAxis(const Vector2& axis, s32& min, s32& max) con
     max = -std::numeric_limits<s32>::max();
 
     for (const Vector2& vertex : vertices) {
-        s32 projection = vertex.dot(axis) / PRECISION;
+        Vector2 globalVertex = vertex + actor_.getPosition();
+        s32 projection = globalVertex.dot(axis);
         min = std::min(min, projection);
         max = std::max(max, projection);
     }
@@ -205,8 +212,15 @@ bool ConvexPolygon::pointInPolygon(const Vector2& point) const {
     bool inside = false;
     size_t vertexCount = vertices.size();
     for (size_t i = 0, j = vertexCount - 1; i < vertexCount; j = i++) {
-        if (((vertices[i].y + actor_.getY() > point.y) != (vertices[j].y + actor_.getY() > point.y)) &&
-            (point.x + actor_.getX() < (((vertices[j].x + actor_.getX() - vertices[i].x + actor_.getX()) * (point.y - vertices[i].y + actor_.getY()) * PRECISION) / (vertices[j].y + actor_.getY() - vertices[i].y + actor_.getY()) + vertices[i].x + actor_.getX()))) {
+        Vector2 vertexI = vertices[i] + actor_.getPosition();
+        Vector2 vertexJ = vertices[j] + actor_.getPosition();
+
+        bool condition1 = (vertexI.y > point.y) != (vertexJ.y > point.y);
+        s32 slope = (vertexJ.x - vertexI.x) * PRECISION / (vertexJ.y - vertexI.y);
+        s32 projectedX = vertexI.x + slope * (point.y - vertexI.y) / PRECISION;
+        bool condition2 = point.x < projectedX;
+
+        if (condition1 && condition2) {
             inside = !inside;
         }
     }

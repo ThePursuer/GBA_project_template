@@ -20,7 +20,7 @@ public:
 
     bool collidesWith(const Collider& other) const override;
     const s32 x() const {return actor_.getX() + x_;}
-    const s32 y() const {return actor_.getX() + y_;}
+    const s32 y() const {return actor_.getY() + y_;}
     const s32 radius() const {return radius_;}
     const Actor& actor() const {return actor_;}
 private:
@@ -39,10 +39,11 @@ public:
 
     bool collidesWith(const Collider& other) const override;
     const s32 x() const {return actor_.getX() + x_;}
-    const s32 y() const {return actor_.getX() + y_;}
+    const s32 y() const {return actor_.getY() + y_;}
     const s32 width() const {return width_;}
     const s32 height() const {return height_;}
     const Actor& actor() const {return actor_;}
+    std::vector<Vector2> getVertices() const;
 private:
     s32 x_, y_;
     s32 width_, height_;

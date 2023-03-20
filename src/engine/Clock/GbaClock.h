@@ -4,6 +4,7 @@
 #include <chrono>
 #include "gba_timers.h"
 #include "gba_interrupt.h"
+//todo: Fix a bug where time_point + duration doesnst work 
 
 // Equvalents of std::chrono::<resolution>, required because std::chrono uses 64bit integers and we don't have those. 
 typedef std::chrono::duration<u32, std::ratio<1, 1000000000>> gba_nanoseconds;
