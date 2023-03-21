@@ -9,24 +9,28 @@
 
 #include "engine/Math/Vector.h"
 #include "engine/Math/ColliderI.h"
-#include "engine/Actor/Actor.h"
 
 class Rectangle;
 class ConvexPolygon;
 
+class Position{
+public:
+    const u32& getX() const;
+    const u32& getY() const;
+};
+
 class Circle : public Collider {
 public:
-    Circle(s32 x, s32 y, s32 radius, const Actor &actor);
+    Circle(s32 x, s32 y, s32 radius, const Position &pos);
 
     bool collidesWith(const Collider& other) const override;
-    const s32 x() const {return actor_.getX() + x_;}
-    const s32 y() const {return actor_.getY() + y_;}
+    const s32& x() const {return pos_.getX() + x_;}
+    const s32& y() const {return pos_.getY() + y_;}
     const s32 radius() const {return radius_;}
-    const Actor& actor() const {return actor_;}
 private:
     s32 x_, y_;
     s32 radius_;
-    const Actor &actor_;
+    const Position& pos_;
 
     bool collidesWithCircle(const Circle& circle) const;
     bool collidesWithRectangle(const Rectangle& rectangle) const;
@@ -35,19 +39,19 @@ private:
 
 class Rectangle : public Collider {
 public:
-    Rectangle(s32 x, s32 y, s32 width, s32 height, const Actor &actor);
+    Rectangle(s32 x, s32 y, s32 width, s32 height, const Position &pos);
 
     bool collidesWith(const Collider& other) const override;
-    const s32 x() const {return actor_.getX() + x_;}
-    const s32 y() const {return actor_.getY() + y_;}
+    const s32& x() const {return pos_.getX() + x_;}
+    const s32& y() const {return pos_.getY() + y_;}
     const s32 width() const {return width_;}
     const s32 height() const {return height_;}
-    const Actor& actor() const {return actor_;}
     std::vector<Vector2> getVertices() const;
+    const Position &getPosition() const {return pos_;}
 private:
     s32 x_, y_;
     s32 width_, height_;
-    const Actor &actor_;
+    const Position& pos_;
 
     bool collidesWithCircle(const Circle& circle) const;
     bool collidesWithRectangle(const Rectangle& rectangle) const;
@@ -56,13 +60,12 @@ private:
 
 class ConvexPolygon : public Collider {
 public:
-    ConvexPolygon(const std::vector<Vector2>& vertices, const Actor& actor);
+    ConvexPolygon(const std::vector<Vector2>& vertices, const Position &pos);
 
     bool collidesWith(const Collider& other) const override;
-    const Actor& actor() const {return actor_;}
 private:
     std::vector<Vector2> vertices;
-    const Actor& actor_;
+    const Position& pos_;
 
     bool collidesWithCircle(const Circle& circle) const;
     bool collidesWithRectangle(const Rectangle& rectangle) const;

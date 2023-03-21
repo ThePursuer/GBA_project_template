@@ -1,11 +1,11 @@
 #include "engine/Math/Collider.h"
 
-// Fixed-point precision factor (e.g., 1000 means 3 decimal places)
+// Fixed-point precision fpos (e.g., 1000 means 3 decimal places)
 static const s32 PRECISION = 1000;
 
 // Circle
 
-Circle::Circle(s32 x, s32 y, s32 radius, const Actor& actor) : x_(x), y_(y), radius_(radius), actor_(actor) {}
+Circle::Circle(s32 x, s32 y, s32 radius, const Position &pos) : x_(x), y_(y), radius_(radius), pos_(pos) {}
 
 bool Circle::collidesWith(const Collider& other) const {
     const Circle* circle = dynamic_cast<const Circle*>(&other);
@@ -51,7 +51,7 @@ bool Circle::collidesWithPolygon(const ConvexPolygon& polygon) const {
 
 // Rectangle
 
-Rectangle::Rectangle(s32 x, s32 y, s32 width, s32 height, const Actor &actor) : x_(x), y_(y), width_(width), height_(height), actor_(actor) {}
+Rectangle::Rectangle(s32 x, s32 y, s32 width, s32 height, const Position &pos) : x_(x), y_(y), width_(width), height_(height), pos_(pos) {}
 
 bool Rectangle::collidesWith(const Collider& other) const {
     const Circle* circle = dynamic_cast<const Circle*>(&other);
@@ -96,7 +96,7 @@ bool Rectangle::collidesWithPolygon(const ConvexPolygon& polygon) const {
 
 // Convex polygon
 
-ConvexPolygon::ConvexPolygon(const std::vector<Vector2>& vertices, const Actor& actor) : vertices(vertices), actor_(actor) {}
+ConvexPolygon::ConvexPolygon(const std::vector<Vector2>& vertices, const Position &pos) : vertices(vertices), pos_(pos){}
 
 bool ConvexPolygon::collidesWith(const Collider& other) const {
     const Circle* circle = dynamic_cast<const Circle*>(&other);
@@ -125,8 +125,8 @@ bool ConvexPolygon::collidesWithCircle(const Circle& circle) const {
 
     // Check if the circle is colliding with any of the polygon's edges
     for (size_t i = 0; i < vertices.size(); ++i) {
-        Vector2 p1 = vertices[i] + actor_.getPosition();
-        Vector2 p2 = vertices[(i + 1) % vertices.size()] + actor_.getPosition();
+        Vector2 p1 = vertices[i] + Vector2(pos_.getX(), pos_.getY());
+        Vector2 p2 = vertices[(i + 1) % vertices.size()] + Vector2(pos_.getX(), pos_.getY());
 
         if (circleIntersectsLineSegment(circle, p1, p2)) {
             return true;
@@ -138,7 +138,7 @@ bool ConvexPolygon::collidesWithCircle(const Circle& circle) const {
 
 bool ConvexPolygon::collidesWithRectangle(const Rectangle& rectangle) const {
     // Convert the rectangle to a polygon
-    ConvexPolygon rectPolygon(rectangle.getVertices(), rectangle.actor());
+    ConvexPolygon rectPolygon(rectangle.getVertices(), rectangle.getPosition());
 
     // Check for collisions between the two polygons using the collidesWithPolygon function
     return collidesWithPolygon(rectPolygon);
@@ -179,7 +179,7 @@ void ConvexPolygon::projectOntoAxis(const Vector2& axis, s32& min, s32& max) con
     max = -std::numeric_limits<s32>::max();
 
     for (const Vector2& vertex : vertices) {
-        Vector2 globalVertex = vertex + actor_.getPosition();
+        Vector2 globalVertex = vertex + Vector2(pos_.getX(), pos_.getY());
         s32 projection = globalVertex.dot(axis);
         min = std::min(min, projection);
         max = std::max(max, projection);
@@ -189,8 +189,8 @@ void ConvexPolygon::projectOntoAxis(const Vector2& axis, s32& min, s32& max) con
 std::vector<Vector2> ConvexPolygon::getEdges() const {
     std::vector<Vector2> edges;
     for (size_t i = 0; i < vertices.size(); ++i) {
-        Vector2 p1 = vertices[i] + actor_.getPosition();
-        Vector2 p2 = vertices[(i + 1) % vertices.size()] + actor_.getPosition();
+        Vector2 p1 = vertices[i] + Vector2(pos_.getX(), pos_.getY());
+        Vector2 p2 = vertices[(i + 1) % vertices.size()] + Vector2(pos_.getX(), pos_.getY());
         edges.push_back(p2 - p1);
     }
     return edges;
@@ -212,8 +212,8 @@ bool ConvexPolygon::pointInPolygon(const Vector2& point) const {
     bool inside = false;
     size_t vertexCount = vertices.size();
     for (size_t i = 0, j = vertexCount - 1; i < vertexCount; j = i++) {
-        Vector2 vertexI = vertices[i] + actor_.getPosition();
-        Vector2 vertexJ = vertices[j] + actor_.getPosition();
+        Vector2 vertexI = vertices[i] + Vector2(pos_.getX(), pos_.getY());
+        Vector2 vertexJ = vertices[j] + Vector2(pos_.getX(), pos_.getY());
 
         bool condition1 = (vertexI.y > point.y) != (vertexJ.y > point.y);
         s32 slope = (vertexJ.x - vertexI.x) * PRECISION / (vertexJ.y - vertexI.y);
