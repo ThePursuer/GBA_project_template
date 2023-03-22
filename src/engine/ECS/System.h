@@ -7,7 +7,7 @@ class ISystem {
 public:
     virtual ~ISystem() = default;
     virtual void initialize(EntityManager& entityManager) = 0;
-    virtual void update(EntityManager& entityManager, gba_milliseconds deltaTime) = 0;
+    virtual void update(EntityManager& entityManager, gba_microseconds deltaTime) = 0;
     virtual void shutdown(EntityManager& entityManager) = 0;
     virtual std::set<ComponentType> requiredComponents() const = 0;
 };

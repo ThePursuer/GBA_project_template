@@ -13,15 +13,18 @@ public:
         // Initialization code
     }
 
-    void update(EntityManager& entityManager, gba_milliseconds deltaTime) override {
+    void update(EntityManager& entityManager, gba_microseconds deltaTime) override {
         auto entities = entityManager.getEntitiesWithComponents({EngineReservedComponents::ANIMATION, EngineReservedComponents::SPRITE, EngineReservedComponents::POSITION});
+        static u32 index = 1;
 
         for (const auto& entity : entities) {
             auto animationComponent = std::static_pointer_cast<AnimationComponent>(entityManager.getComponent(entity, EngineReservedComponents::ANIMATION));
             auto spriteComponent = std::static_pointer_cast<SpriteComponent>(entityManager.getComponent(entity, EngineReservedComponents::SPRITE));
+            auto positionComponent = std::static_pointer_cast<PositionComponent>(entityManager.getComponent(entity, EngineReservedComponents::POSITION));
 
             if (animationComponent->isAnimating_) {
                 // Update animation time
+
                 animationComponent->animationTime += deltaTime;
                 // Calculate the next frame index based on the current animation time
                 u32 newFrameIndex = static_cast<u32>(animationComponent->animationTime.count() / animationComponent->sequences_[animationComponent->currentAnimation].frameDuration_.count());
@@ -30,7 +33,7 @@ public:
                 if (newFrameIndex >= animationComponent->sequences_[animationComponent->currentAnimation].frames_.size()) {
                     if (animationComponent->loopAnimation) {
                         newFrameIndex %= animationComponent->sequences_[animationComponent->currentAnimation].frames_.size();
-                        animationComponent->animationTime = gba_milliseconds::zero();
+                        animationComponent->animationTime = gba_microseconds::zero();
                     } else {
                         animationComponent->isAnimating_ = false;
                         continue;
@@ -55,19 +58,20 @@ public:
 
     static void playAnimation(EntityManager& entityManager, Entity entity, AnimationName name, bool loop) {
         auto animationComponent = std::static_pointer_cast<AnimationComponent>(entityManager.getComponent(entity, EngineReservedComponents::ANIMATION));
+        auto spriteComponent = std::static_pointer_cast<SpriteComponent>(entityManager.getComponent(entity, EngineReservedComponents::SPRITE));
 
         if (!animationComponent) {
             return; // AnimationComponent not found for the given entity
         }
 
-        if (animationComponent->currentAnimation == name) {
+        if (animationComponent->currentAnimation == name && animationComponent->isAnimating_) {
             return; // The requested animation is already playing
         }
 
         animationComponent->isAnimating_ = true;
         animationComponent->currentAnimation = name;
         animationComponent->loopAnimation = loop;
-        animationComponent->animationTime = gba_milliseconds::zero();
+        animationComponent->animationTime = gba_microseconds::zero();
         animationComponent->currentFrameIndex = 0;
         animationComponent->should_update_sprite_ = true;
     }

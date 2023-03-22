@@ -24,7 +24,7 @@ enum EngineReservedComponents : ComponentType{
 
 auto wow = EngineReservedComponents::ANIMATION;
 
-class AnimationComponent: Component{
+class AnimationComponent: public Component{
 public:
     std::map<u32, Animation> sequences_;
 
@@ -32,23 +32,23 @@ public:
     bool should_update_sprite_ = false;
     bool isUpdating_;
 
-    AnimationName currentAnimation; // The current animation being played
-    bool loopAnimation; // Whether the current animation should loop
-    gba_milliseconds animationTime; // The time elapsed since the current animation started
-    u32 currentFrameIndex; // The current frame index in the current animation sequence
+    AnimationName currentAnimation = 0; // The current animation being played
+    bool loopAnimation = false; // Whether the current animation should loop
+    gba_microseconds animationTime = gba_microseconds(0); // The time elapsed since the current animation started
+    u32 currentFrameIndex = 0; // The current frame index in the current animation sequence
 };
 
-class SpriteComponent: Component{
+class SpriteComponent: public Component{
 public:
     std::unique_ptr<Sprite> sprite;
 };
 
-class ColliderComponent: Component{
+class ColliderComponent: public Component{
 public:
     std::vector<Collider> colliders_;
 };
 
-class PositionComponent: Position, Component{
+class PositionComponent: Position, public Component{
 public:
     const u32& getX() const {return x;}
     const u32& getY() const {return y;}

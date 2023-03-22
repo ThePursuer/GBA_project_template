@@ -1,5 +1,4 @@
 #include "GbaClock.h"
-#include <stdio.h>
 
 GbaClock& GbaClock::instance() {
     static GbaClock clock;

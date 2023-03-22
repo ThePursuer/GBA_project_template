@@ -9,6 +9,7 @@
 
 #include "engine/ECS/EntityManager.h"
 #include "engine/ECS/System.h"
+#include "engine/Clock/GbaClock.h"
 
 class SystemManager {
 public:
@@ -22,7 +23,7 @@ public:
         }
     }
 
-    void updateAllSystems(EntityManager& entityManager, float deltaTime) {
+    void updateAllSystems(EntityManager& entityManager, gba_microseconds deltaTime) {
         for (auto& system : systems) {
             system->update(entityManager, deltaTime);
         }
