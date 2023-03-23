@@ -2,6 +2,7 @@
 #define SYSTEM_H
 
 #include "engine/ECS/EntityManager.h"
+#include "engine/Clock/GbaClock.h"
 
 class ISystem {
 public:

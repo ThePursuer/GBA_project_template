@@ -15,8 +15,8 @@ class ConvexPolygon;
 
 class Position{
 public:
-    const u32& getX() const;
-    const u32& getY() const;
+    const u32 getX() const;
+    const u32 getY() const;
 };
 
 class Circle : public Collider {
@@ -24,8 +24,8 @@ public:
     Circle(s32 x, s32 y, s32 radius, const Position &pos);
 
     bool collidesWith(const Collider& other) const override;
-    const s32& x() const {return pos_.getX() + x_;}
-    const s32& y() const {return pos_.getY() + y_;}
+    const s32 x() const {return pos_.getX() + x_;}
+    const s32 y() const {return pos_.getY() + y_;}
     const s32 radius() const {return radius_;}
 private:
     s32 x_, y_;
@@ -42,8 +42,8 @@ public:
     Rectangle(s32 x, s32 y, s32 width, s32 height, const Position &pos);
 
     bool collidesWith(const Collider& other) const override;
-    const s32& x() const {return pos_.getX() + x_;}
-    const s32& y() const {return pos_.getY() + y_;}
+    const s32 x() const {return pos_.getX() + x_;}
+    const s32 y() const {return pos_.getY() + y_;}
     const s32 width() const {return width_;}
     const s32 height() const {return height_;}
     std::vector<Vector2> getVertices() const;

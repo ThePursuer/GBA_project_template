@@ -1,8 +1,8 @@
-#ifndef SYSTEM_COMPONENTS_H
-#define SYSTEM_COMPONENTS_H
+#ifndef ENGINE_COMPONENTS_H
+#define ENGINE_COMPONENTS_H
 
 #include <vector>
-#include <map>
+#include <unordered_map>
 
 #include <gba_types.h>
 
@@ -12,6 +12,7 @@
 #include "engine/Math/ColliderI.h"
 #include "engine/Clock/GbaClock.h"
 #include "engine/ECS/Component.h"
+#include "engine/Signal.h"
 
 #define COMPONENT_CAST(component) std::static_pointer_cast<Component>(component)
 
@@ -22,25 +23,24 @@ enum EngineReservedComponents : ComponentType{
         SPRITE
 };
 
-auto wow = EngineReservedComponents::ANIMATION;
-
 class AnimationComponent: public Component{
 public:
-    std::map<u32, Animation> sequences_;
+    std::unordered_map<u32, Animation> sequences_;
 
     bool isAnimating_ = false;
     bool should_update_sprite_ = false;
-    bool isUpdating_;
 
     AnimationName currentAnimation = 0; // The current animation being played
     bool loopAnimation = false; // Whether the current animation should loop
-    gba_microseconds animationTime = gba_microseconds(0); // The time elapsed since the current animation started
+    gba_milliseconds animationTime = gba_milliseconds(0); // The time elapsed since the current animation started
     u32 currentFrameIndex = 0; // The current frame index in the current animation sequence
+    u32 lastFrameIndex = -1;
 };
 
 class SpriteComponent: public Component{
 public:
     std::unique_ptr<Sprite> sprite;
+    bool needs_update = true;
 };
 
 class ColliderComponent: public Component{
@@ -50,9 +50,9 @@ public:
 
 class PositionComponent: Position, public Component{
 public:
-    const u32& getX() const {return x;}
-    const u32& getY() const {return y;}
-    u32 x, y;
+    const s32& getX() const {return x;}
+    const s32& getY() const {return y;}
+    s32 x, y;
 };
 
-#endif // SYSTEM_COMPONENTS_H
+#endif // ENGINE_COMPONENTS_H

@@ -1,26 +1,32 @@
-#include "InputHandler.h"
+#include "engine/ECS/Systems/InputSystem.h"
 
-void InputHandler::registerEvent(EventType type, u32 key, EventCallback callback) {
-    events[type][key] = callback;
+void InputSystem::initialize(EntityManager& entityManager) {}
+
+Signal<>& InputSystem::getEventSignal(ButtonEventType type, u32 key) {
+    if (events.count(type) == 0 || events[type].count(key) == 0)
+        events[type][key] = Signal<>();
+    return events[type][key];
 }
 
-void InputHandler::update() {
+void InputSystem::update(EntityManager& entityManager, gba_microseconds deltaTime) {
+    Entity player = entityManager.getEntitiesWithComponent(0)[0];
+    // auto spriteComponent = std::static_pointer_cast<SpriteComponent>(entityManager.getComponent(player, EngineReservedComponents::SPRITE));
+    // spriteComponent->sprite->setGFXIndex(0);
+    // spriteComponent->sprite->update();
+
     scanKeys();
     u16 keys_down = keysDown();
     u16 keys_up = keysUp();
     u16 keys_held = keysHeld();
-    handleEvents(keys_down, keys_up, keys_held);
-}
 
-void InputHandler::handleEvents(u16 keys_down, u16 keys_up, u16 keys_held) {
     // Handle ButtonPressed, ButtonReleased, and ButtonHeld events
-    for (const auto& pair : events[EventType::ButtonPressed]) {
+    for (auto& pair : events[ButtonEventType::ButtonPressed]) {
         if (keys_down & pair.first) pair.second();
     }
-    for (const auto& pair : events[EventType::ButtonReleased]) {
+    for (auto& pair : events[ButtonEventType::ButtonReleased]) {
         if (keys_up & pair.first) pair.second();
     }
-    for (const auto& pair : events[EventType::ButtonHeld]) {
+    for (auto& pair : events[ButtonEventType::ButtonHeld]) {
         if (keys_held & pair.first) pair.second();
     }
 
@@ -29,7 +35,7 @@ void InputHandler::handleEvents(u16 keys_down, u16 keys_up, u16 keys_held) {
     static std::map<u32, Clock::time_point> keyTimestamps;
     static std::map<u32, bool> keyTapped;
 
-    for (const auto& pair : events[EventType::ButtonHeld300Ms]) {
+    for (auto& pair : events[ButtonEventType::ButtonHeld300Ms]) {
         if (keys_held & pair.first) {
             auto& timestamp = keyTimestamps[pair.first];
             auto now = Clock::instance().now();
@@ -40,7 +46,7 @@ void InputHandler::handleEvents(u16 keys_down, u16 keys_up, u16 keys_held) {
         }
     }
 
-    for (const auto& pair : events[EventType::ButtonDoubleTap]) {
+    for (auto& pair : events[ButtonEventType::ButtonDoubleTap]) {
         if (keys_down & pair.first) {
             auto& timestamp = keyTimestamps[pair.first];
             auto& tapped = keyTapped[pair.first];
@@ -56,3 +62,7 @@ void InputHandler::handleEvents(u16 keys_down, u16 keys_up, u16 keys_held) {
         }
     }
 }
+
+void InputSystem::shutdown(EntityManager& entityManager) {}
+
+std::set<ComponentType> InputSystem::requiredComponents() const {return {};}
