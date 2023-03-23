@@ -2,6 +2,7 @@
 #define GBA_CLOCK
 
 #include <chrono>
+
 #include "gba_timers.h"
 #include "gba_interrupt.h"
 //todo: Fix a bug where time_point + duration doesnst work 
@@ -14,7 +15,7 @@ typedef std::chrono::duration<u32, std::ratio<1, 1>> gba_seconds;
 
 class GbaClock {
 public:
-    typedef std::chrono::duration<u32, std::ratio<1, 16780000>> duration;
+    typedef gba_milliseconds duration;
     typedef duration::rep rep;
     typedef duration::period period;
     typedef std::chrono::time_point<GbaClock> time_point;
