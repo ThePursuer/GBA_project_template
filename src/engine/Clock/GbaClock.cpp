@@ -1,5 +1,7 @@
 #include "GbaClock.h"
 
+u32 GbaClock::rollovers = 0;
+
 GbaClock& GbaClock::instance() {
     static GbaClock clock;
     return clock;
@@ -14,8 +16,6 @@ void GbaClock::handle_interrupt() {
 }
 
 GbaClock::GbaClock() {
-    rollovers = 0;
-
     REG_TM3CNT_L = 0; // reset timer value
     REG_TM3CNT_H = TIMER_START | TIMER_IRQ | TIMER_COUNT | 0b11; // start timer with interrupts enabled, maximum prescale
     REG_TM3CNT_H &= ~(1 << 2);

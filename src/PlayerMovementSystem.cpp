@@ -17,15 +17,12 @@ void PlayerMovementSystem::update(EntityManager& entityManager, gba_microseconds
         if(playerInputStateComponent->changes[PlayerInputStateComponent::DELTAY])
             positionComponent->y += playerInputStateComponent->deltaY;
 
-        spriteComponent->sprite->setPosition(positionComponent->getX(), positionComponent->getY());
-            
-
         if(playerInputStateComponent->changes[PlayerInputStateComponent::FLIPX])
             spriteComponent->sprite->flipX(playerInputStateComponent->flipX);
         if(playerInputStateComponent->changes[PlayerInputStateComponent::NEXT_ANIMATION]){
             AnimationSystem::playAnimation(entityManager, player, playerInputStateComponent->next_animation, playerInputStateComponent->loop_animation);
         }
-
+        spriteComponent->needs_update = true;
         playerInputStateComponent->changes.reset();
     }
 }
@@ -34,7 +31,7 @@ void PlayerMovementSystem::shutdown(EntityManager& entityManager) {
     entityManager.destroyEntity(playerInputStateManager);
 }
 
-std::set<ComponentType> PlayerMovementSystem::requiredComponents() const { return {GAME_COMPONENTS::PLAYER_INPUT_STATE_COMPONENT, EngineReservedComponents::POSITION};}
+std::unordered_set<ComponentType> PlayerMovementSystem::requiredComponents() const { return {GAME_COMPONENTS::PLAYER_INPUT_STATE_COMPONENT, EngineReservedComponents::POSITION};}
 
 void PlayerMovementSystem::moveUp() {
     playerInputStateComponent->deltaY = -1;

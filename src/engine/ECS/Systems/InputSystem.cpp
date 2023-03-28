@@ -1,14 +1,19 @@
 #include "engine/ECS/Systems/InputSystem.h"
 
-void InputSystem::initialize(EntityManager& entityManager) {}
+void InputSystem::initialize(EntityManager& entityManager) {
+    Entity ICEntity = entityManager.getEntitiesWithComponent(EngineReservedComponents::INDEXABLE_COMPONENTS_COMPONENT)[0];
+    auto ICComponent = std::static_pointer_cast<IndexableComponentsComponent>(entityManager.getComponent(ICEntity, EngineReservedComponents::INDEXABLE_COMPONENTS_COMPONENT));
+    auto required = requiredComponents();
+    ICComponent->indexableComponents.insert(required.begin(), required.end());
+}
 
-Signal<>& InputSystem::getEventSignal(ButtonEventType type, u32 key) {
+Signal<>& __attribute__((section(".iwram"), long_call)) InputSystem::getEventSignal(ButtonEventType type, u32 key) {
     if (events.count(type) == 0 || events[type].count(key) == 0)
         events[type][key] = Signal<>();
     return events[type][key];
 }
 
-void InputSystem::update(EntityManager& entityManager, gba_microseconds deltaTime) {
+void __attribute__((section(".iwram"), long_call)) InputSystem::update(EntityManager& entityManager, gba_microseconds deltaTime) {
     Entity player = entityManager.getEntitiesWithComponent(0)[0];
     // auto spriteComponent = std::static_pointer_cast<SpriteComponent>(entityManager.getComponent(player, EngineReservedComponents::SPRITE));
     // spriteComponent->sprite->setGFXIndex(0);
@@ -32,8 +37,8 @@ void InputSystem::update(EntityManager& entityManager, gba_microseconds deltaTim
 
     // Handle ButtonHeld300Ms and ButtonDoubleTap events
     using Clock = GbaClock;
-    static std::map<u32, Clock::time_point> keyTimestamps;
-    static std::map<u32, bool> keyTapped;
+    static std::unordered_map<u32, Clock::time_point> keyTimestamps;
+    static std::unordered_map<u32, bool> keyTapped;
 
     for (auto& pair : events[ButtonEventType::ButtonHeld300Ms]) {
         if (keys_held & pair.first) {
@@ -65,4 +70,4 @@ void InputSystem::update(EntityManager& entityManager, gba_microseconds deltaTim
 
 void InputSystem::shutdown(EntityManager& entityManager) {}
 
-std::set<ComponentType> InputSystem::requiredComponents() const {return {};}
+std::unordered_set<ComponentType> InputSystem::requiredComponents() const {return {};}

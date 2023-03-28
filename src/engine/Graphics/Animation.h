@@ -1,5 +1,4 @@
-#ifndef FRAME_H
-#define FRAME_H
+#pragma once
 
 #include <vector>
 #include <memory>
@@ -10,19 +9,25 @@
 #include "engine/Math/Vector.h"
 #include "engine/Clock/GbaClock.h"
 
-typedef u32 AnimationName;
+typedef s32 AnimationName;
 
-struct Animation {
-    Animation() = default; // default constructor
-    Animation(const std::vector<u32> frames, const gba_milliseconds frameDuration): frames_(frames), frameDuration_(frameDuration){}
-    Animation operator=(const Animation& animation){
-        frames_ = animation.frames_;
-        frameDuration_ = animation.frameDuration_;
+
+struct AnimationClip {
+    std::vector<u32> frames;
+    std::shared_ptr<Collider> collider;
+    gba_milliseconds clipDuration;
+    const unsigned short* graphicsData;
+    u32 graphicsDataLen;
+    u32 frameCount;
+    
+    // Copy assignment operator
+    AnimationClip& operator=(const AnimationClip& other) {
+        frames = other.frames;                             // Copy the frames vector
+        collider = other.collider;                         // Copy the shared_ptr, incrementing the reference count
+        clipDuration = other.clipDuration;                 // Copy the duration
+        graphicsData = other.graphicsData;                 // Copy the graphics data pointer
+        graphicsDataLen = other.graphicsDataLen;           // Copy the graphics data length
+        frameCount = other.frameCount;                     // Copy the frame count
         return *this;
     }
-
-    std::vector<u32> frames_;
-    gba_milliseconds frameDuration_;
 };
-
-#endif

@@ -138,7 +138,7 @@ bool ConvexPolygon::collidesWithCircle(const Circle& circle) const {
 
 bool ConvexPolygon::collidesWithRectangle(const Rectangle& rectangle) const {
     // Convert the rectangle to a polygon
-    ConvexPolygon rectPolygon(rectangle.getVertices(), rectangle.getPosition());
+    ConvexPolygon rectPolygon(rectangle.getVertices(), rectangle.pos_);
 
     // Check for collisions between the two polygons using the collidesWithPolygon function
     return collidesWithPolygon(rectPolygon);

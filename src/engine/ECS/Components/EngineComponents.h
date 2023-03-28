@@ -2,6 +2,7 @@
 #define ENGINE_COMPONENTS_H
 
 #include <vector>
+#include <set>
 #include <unordered_map>
 
 #include <gba_types.h>
@@ -12,29 +13,22 @@
 #include "engine/Math/ColliderI.h"
 #include "engine/Clock/GbaClock.h"
 #include "engine/ECS/Component.h"
-#include "engine/Signal.h"
+#include "engine/ECS/EntityManager.h"
+#include "engine/ECS/Interface.h"
 
-#define COMPONENT_CAST(component) std::static_pointer_cast<Component>(component)
 
-enum EngineReservedComponents : ComponentType{
-        ANIMATION = 10000,
-        COLLIDERS,
-        POSITION,
-        SPRITE
+class StaticColliderComponent: public Component{
+public:
+    std::shared_ptr<Collider> collider;
 };
 
-class AnimationComponent: public Component{
+class AnimationClipComponent : public Component {
 public:
-    std::unordered_map<u32, Animation> sequences_;
-
-    bool isAnimating_ = false;
-    bool should_update_sprite_ = false;
-
-    AnimationName currentAnimation = 0; // The current animation being played
-    bool loopAnimation = false; // Whether the current animation should loop
-    gba_milliseconds animationTime = gba_milliseconds(0); // The time elapsed since the current animation started
-    u32 currentFrameIndex = 0; // The current frame index in the current animation sequence
-    u32 lastFrameIndex = -1;
+    std::unordered_map<AnimationName, AnimationClip> clips;  // The animation clips for this entity
+    AnimationName currentClip = -1;                           // The current animation clip being played
+    u32 currentFrameIndex = 0;                           // The current frame index in the current animation clip
+    gba_milliseconds elapsedTime = gba_milliseconds(0);  // The elapsed time since the current animation clip started
+    bool loopAnimation = false;                          // Whether the current animation should loop
 };
 
 class SpriteComponent: public Component{
@@ -43,16 +37,23 @@ public:
     bool needs_update = true;
 };
 
-class ColliderComponent: public Component{
+class PositionComponent: public Position, public Component{
 public:
-    std::vector<Collider> colliders_;
+    const __attribute__((section(".iwram"), long_call)) s32& getX() const {return x;}
+    const __attribute__((section(".iwram"), long_call)) s32& getY() const {return y;}
+    s32 x, y;
 };
 
-class PositionComponent: Position, public Component{
+struct CollisionEvent {
+    Entity A;
+    std::shared_ptr<Collider> colliderA;
+    Entity B;
+    std::shared_ptr<Collider> colliderB;
+};
+
+class CollisionEventComponent: public Component{
 public:
-    const s32& getX() const {return x;}
-    const s32& getY() const {return y;}
-    s32 x, y;
+    std::vector<CollisionEvent> events;
 };
 
 #endif // ENGINE_COMPONENTS_H

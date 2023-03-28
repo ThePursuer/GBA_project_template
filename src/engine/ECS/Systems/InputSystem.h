@@ -7,18 +7,18 @@
 #include "engine/Input.h"
 #include "engine/ECS/System.h"
 #include "engine/ECS/Components/EngineComponents.h"
-
 #include "engine/ECS/Systems/AnimationSystem.h"
+#include "engine/Signal.h"
 
 class InputSystem : public ISystem{
 public:
     void initialize(EntityManager& entityManager);
-    Signal<>& getEventSignal(ButtonEventType type, u32 key); // get signal associated with button press
-    void update(EntityManager& entityManager, gba_microseconds deltaTime);
+    Signal<>& IWRAM_CODE getEventSignal(ButtonEventType type, u32 key); // get signal associated with button press
+    void IWRAM_CODE update(EntityManager& entityManager, gba_microseconds deltaTime);
     void shutdown(EntityManager& entityManager);
-    std::set<ComponentType> requiredComponents() const;
+    std::unordered_set<ComponentType> requiredComponents() const;
 private:
-    std::map<ButtonEventType, std::map<u32, Signal<>>> events;
+    std::unordered_map<ButtonEventType, std::unordered_map<u32, Signal<>>> events;
 };
 
 

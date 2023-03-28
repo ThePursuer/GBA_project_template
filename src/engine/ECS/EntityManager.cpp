@@ -1,58 +1,60 @@
 // EntityManager.cpp
 #include "EntityManager.h"
 
-EntityManager::EntityManager(std::set<ComponentType> indexableComponents)
-    : indexableComponentTypes_(indexableComponents), nextEntity_(1) {}
+EntityManager::EntityManager(std::unordered_set<ComponentType> indexableComponents): nextEntity_(1) {
+    indexableComponentTypes_ = std::make_shared<IndexableComponentsComponent>();
+    indexableComponentTypes_->indexableComponents.insert(indexableComponents.begin(), indexableComponents.end());
+    Entity indexableComponentsEntity = CreateEntity();
+    addComponent(indexableComponentsEntity, EngineReservedComponents::INDEXABLE_COMPONENTS_COMPONENT, indexableComponentTypes_);
+}
 
 EntityManager::~EntityManager() {}
 
-Entity EntityManager::CreateEntity() {
+__attribute__((section(".iwram"), long_call)) Entity EntityManager::CreateEntity() {
     Entity newEntity = nextEntity_;
     nextEntity_++;
     return newEntity;
 }
 
-void EntityManager::destroyEntity(Entity entity) {
+void __attribute__((section(".iwram"), long_call)) EntityManager::destroyEntity(Entity entity) {
     for (auto const& [componentType, component] : entityComponents_[entity]) {
-        if (indexableComponentTypes_.count(componentType) > 0) {
+        if (indexableComponentTypes_->indexableComponents.count(componentType) > 0) {
             auto& entities = entitiesByComponent_[componentType];
+            auto entityToRemove = std::find(entities.begin(), entities.end(), entity);
+            entities.erase(entityToRemove);
         }
     }
     entityComponents_.erase(entity);
 }
 
-void EntityManager::addComponent(Entity entity, ComponentType componentType, std::shared_ptr<Component> component) {
+void __attribute__((section(".iwram"), long_call)) EntityManager::addComponent(Entity entity, ComponentType componentType, std::shared_ptr<Component> component) {
     entityComponents_[entity][componentType] = component;
-    if (indexableComponentTypes_.count(componentType) > 0) {
+    if (indexableComponentTypes_->indexableComponents.count(componentType) > 0) {
         entitiesByComponent_[componentType].push_back(entity);
     }
 }
 
-void EntityManager::removeComponent(Entity entity, ComponentType componentType) {
+void __attribute__((section(".iwram"), long_call)) EntityManager::removeComponent(Entity entity, ComponentType componentType) {
     entityComponents_[entity].erase(componentType);
-    if (indexableComponentTypes_.count(componentType) > 0) {
+    if (indexableComponentTypes_->indexableComponents.count(componentType) > 0) {
         auto& entities = entitiesByComponent_[componentType];
         auto entityToRemove = std::find(entities.begin(), entities.end(), entity);
         entities.erase(entityToRemove);
     }
 }
 
-std::shared_ptr<Component> EntityManager::getComponent(Entity entity, ComponentType componentType) {
-    auto it = entityComponents_[entity].find(componentType);
-    if (it != entityComponents_[entity].end()) {
-        return it->second;
-    }
-    return nullptr;
+std::shared_ptr<Component> __attribute__((section(".iwram"), long_call)) EntityManager::getComponent(Entity entity, ComponentType componentType) {
+    return entityComponents_[entity][componentType]; // Assume the caller knows what they are talking about
 }
 
-std::vector<Entity> EntityManager::getEntitiesWithComponent(ComponentType type) {
-    if (indexableComponentTypes_.count(type) > 0) {
+std::vector<Entity> __attribute__((section(".iwram"), long_call)) EntityManager::getEntitiesWithComponent(ComponentType type) {
+    if (indexableComponentTypes_->indexableComponents.count(type) > 0) {
         return entitiesByComponent_[type];
     }
     return std::vector<Entity>();
 }
 
-std::vector<Entity> EntityManager::getEntitiesWithComponents(const std::set<ComponentType>& componentTypes) {
+std::vector<Entity> __attribute__((section(".iwram"), long_call)) EntityManager::getEntitiesWithComponents(const std::unordered_set<ComponentType>& componentTypes) {
     std::vector<Entity> result;
 
     // Get the smallest entity list to minimize iterations

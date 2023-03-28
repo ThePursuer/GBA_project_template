@@ -11,8 +11,8 @@
 #include "engine/ECS/Systems/AnimationSystem.h"
 #include "Components.h"
 
-enum PLAYER_ANIMATIONS: s8{
-    IDLE,
+enum PLAYER_ANIMATIONS: u8{
+    IDLE = 1,
     WALK,
     FIRE,
     DIE
@@ -39,7 +39,7 @@ public:
     void initialize(EntityManager& entityManager);
     void update(EntityManager& entityManager, gba_microseconds deltaTime);
     void shutdown(EntityManager& entityManager);
-    std::set<ComponentType> requiredComponents() const;
+    std::unordered_set<ComponentType> requiredComponents() const;
 
     void moveUp();
     void moveDown();
