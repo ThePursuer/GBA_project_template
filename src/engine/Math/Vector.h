@@ -1,9 +1,16 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+#include <cmath>
+
+#include "engine/Math/Math.h"
+
+#include <stdio.h>
+
 // Representation of a 2D vector for use in SAT
 class Vector2 {
 public:
+    Vector2() = default;
     Vector2(float x, float y) : x(x), y(y) {}
 
     float x, y;
@@ -11,8 +18,21 @@ public:
     Vector2 perpendicular() const {
         return Vector2(-y, x);
     }
-        float lengthSquared() const {
+
+    float lengthSquared() const {
         return x * x + y * y;
+    }
+
+    float length() const {
+        return Math::sqrtFloat(lengthSquared());
+    }
+
+    Vector2 normalize() const {
+        float len = length();
+        if (len == 0) {
+            return Vector2(0, 0);
+        }
+        return Vector2(x / len, y / len);
     }
 
     float dot(const Vector2& other) const {

@@ -36,6 +36,7 @@ public:
 
 class PlayerMovementSystem: public ISystem{
 public:
+    PlayerMovementSystem(InputSystem &inputSystem);
     void initialize(EntityManager& entityManager);
     void update(EntityManager& entityManager, gba_microseconds deltaTime);
     void shutdown(EntityManager& entityManager);

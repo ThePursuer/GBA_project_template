@@ -5,8 +5,9 @@
 #include "engine/ECS/Components/EngineComponents.h"
 #include "engine/Signal.h"
 
-class CollisionSystem : ISystem{
+class CollisionSystem : public ISystem{
 public:
+    CollisionSystem(EntityManager& entityManager);
     void initialize(EntityManager& entityManager);
     void IWRAM_CODE update(EntityManager& entityManager, gba_microseconds deltaTime);
     void shutdown(EntityManager& entityManager);

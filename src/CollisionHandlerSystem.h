@@ -17,7 +17,9 @@ public:
 private:
     Entity box_;
     Entity player_;
+    
     std::shared_ptr<CollisionEventComponent> collisionEventsComponent;
+    std::shared_ptr<PhysicsEventComponent> physicsEventsComponent;
 };
 
 #endif // COLLISION_HANDLER_SYSTEM_H

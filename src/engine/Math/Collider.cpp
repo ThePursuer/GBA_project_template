@@ -26,6 +26,38 @@ bool Circle::collidesWith(const Collider& other) const {
     return false;
 }
 
+Vector2 Circle::getPenetration(const Collider& other) const {
+    const Circle* circle = dynamic_cast<const Circle*>(&other);
+    if (circle) {
+        return getPenetrationWithCircle(*circle);
+    }
+
+    const Rectangle* rectangle = dynamic_cast<const Rectangle*>(&other);
+    if (rectangle) {
+        return getPenetrationWithRectangle(*rectangle);
+    }
+    
+    return Vector2();
+}
+
+Vector2 Circle::getCollisionNormal(const Collider& other) const {
+    const Circle* circle = dynamic_cast<const Circle*>(&other);
+    if (circle) {
+        Vector2 normal(x() - circle->x(), y() - circle->y());
+        normal.normalize();
+        return normal;
+    }
+
+    const Rectangle* rectangle = dynamic_cast<const Rectangle*>(&other);
+    if (rectangle) {
+        Vector2 normal(x() - rectangle->x(), y() - rectangle->y());
+        normal.normalize();
+        return normal;
+    }
+
+    return Vector2(0.0, 0.0);
+}
+
 bool Circle::collidesWithCircle(const Circle& circle) const {
     s32 dx = x() - circle.x();
     s32 dy = y() - circle.y();
@@ -47,6 +79,43 @@ bool Circle::collidesWithRectangle(const Rectangle& rectangle) const {
 
 bool Circle::collidesWithPolygon(const ConvexPolygon& polygon) const {
     return polygon.collidesWith(*this);
+}
+
+Vector2 Circle::getPenetrationWithCircle(const Circle& other) const {
+    // Calculate the vector between the two circle centers
+    Vector2 centerToCenter = Vector2(other.x(), other.y()) - Vector2(x(), y());
+
+    // Calculate the sum of the radii of both circles
+    float radiiSum = radius() + other.radius();
+
+    // Calculate the penetration depth
+    float penetration = radiiSum - centerToCenter.length();
+
+    // Calculate the direction of the shortest distance to the edge of the overlapping region
+    Vector2 direction = centerToCenter.normalize();
+
+    // Multiply the direction by the penetration depth to get the shortest distance to the edge of the overlapping region
+    return direction * penetration;
+}
+
+Vector2 Circle::getPenetrationWithRectangle(const Rectangle& other) const {
+    // Find the closest point on the AABB to the circle center
+    Vector2 closestPoint(
+        std::clamp(x(), other.x(), other.x() + other.width()),
+        std::clamp(y(), other.y(), other.y() + other.height())
+    );
+
+    // Calculate the vector from the circle center to the closest point
+    Vector2 circleToClosest = Vector2(x(), y()) - closestPoint;
+
+    // Calculate the penetration depth
+    float penetration = radius() - circleToClosest.length();
+
+    // Calculate the direction of the shortest distance to the edge of the overlapping region
+    Vector2 direction = circleToClosest.normalize();
+
+    // Multiply the direction by the penetration depth to get the shortest distance to the edge of the overlapping region
+    return direction * penetration;
 }
 
 // Rectangle
@@ -72,6 +141,38 @@ bool Rectangle::collidesWith(const Collider& other) const {
     return false;
 }
 
+Vector2 Rectangle::getPenetration(const Collider& other) const {
+    const Circle* circle = dynamic_cast<const Circle*>(&other);
+    if (circle) {
+        return getPenetrationWithCircle(*circle);
+    }
+
+    const Rectangle* rectangle = dynamic_cast<const Rectangle*>(&other);
+    if (rectangle) {
+        return getPenetrationWithRectangle(*rectangle);
+    }
+    
+    return Vector2();
+}
+
+Vector2 Rectangle::getCollisionNormal(const Collider& other) const {
+    const Circle* circle = dynamic_cast<const Circle*>(&other);
+    if (circle) {
+        Vector2 normal(x() - circle->x(), y() - circle->y());
+        normal.normalize();
+        return normal;
+    }
+
+    const Rectangle* rectangle = dynamic_cast<const Rectangle*>(&other);
+    if (rectangle) {
+        Vector2 normal(x() - rectangle->x(), y() - rectangle->y());
+        normal.normalize();
+        return normal;
+    }
+
+    return Vector2(0.0, 0.0);
+}
+
 std::vector<Vector2> Rectangle::getVertices() const {
     return {
         Vector2(x_, y_),
@@ -92,6 +193,28 @@ bool Rectangle::collidesWithRectangle(const Rectangle& rectangle) const {
 
 bool Rectangle::collidesWithPolygon(const ConvexPolygon& polygon) const {
     return polygon.collidesWith(*this);
+}
+
+Vector2 Rectangle::getPenetrationWithCircle(const Circle& other) const {
+    // Calculate the vector between the two circle centers
+    return other.getPenetration(*this);
+}
+
+Vector2 Rectangle::getPenetrationWithRectangle(const Rectangle& other) const {
+    float penetrationDepthX = std::min((x() + width()) - other.x(), other.x() + other.width() - x());
+    float penetrationDepthY = std::min(y() + height() - other.y(), other.y() + other.height() - y());
+
+    // Calculate the direction of the shortest distance to the edge of the overlapping region
+    Vector2 direction;
+    if (penetrationDepthX < penetrationDepthY) {
+        direction = Vector2((x() + width() / 2.0f) < (other.x() + other.width() / 2.0f) ? -1.0f : 1.0f, 0.0f);
+    }
+    else {
+        direction = Vector2(0.0f, (y() + height() / 2.0f) < (other.y() + other.height() / 2.0f) ? -1.0f : 1.0f);
+    }
+
+    // Multiply the direction by the penetration depth to get the shortest distance to the edge of the overlapping region
+    return direction * std::min(penetrationDepthX, penetrationDepthY);
 }
 
 // Convex polygon

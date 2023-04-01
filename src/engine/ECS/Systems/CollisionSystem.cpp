@@ -1,10 +1,12 @@
 #include "engine/ECS/Systems/CollisionSystem.h"
 
-void CollisionSystem::initialize(EntityManager& entityManager){
+CollisionSystem::CollisionSystem(EntityManager& entityManager){
     collisionEvents = entityManager.CreateEntity();
     collisionEventComponent = std::make_shared<CollisionEventComponent>();
     entityManager.addComponent(collisionEvents, EngineReservedComponents::COLLISION_EVENTS, collisionEventComponent);
+}
 
+void CollisionSystem::initialize(EntityManager& entityManager){
     Entity ICEntity = entityManager.getEntitiesWithComponent(EngineReservedComponents::INDEXABLE_COMPONENTS_COMPONENT)[0];
     auto ICComponent = std::static_pointer_cast<IndexableComponentsComponent>(entityManager.getComponent(ICEntity, EngineReservedComponents::INDEXABLE_COMPONENTS_COMPONENT));
     auto required = requiredComponents();
@@ -44,17 +46,22 @@ void CollisionSystem::update(EntityManager& entityManager, gba_microseconds dt) 
             collidersWithEntities.emplace_back(staticColliderComponent->collider, entity);
     }
 
+    auto collisioneventsentity = entityManager.getEntitiesWithComponent(EngineReservedComponents::COLLISION_EVENTS)[0];
+    auto comp = std::static_pointer_cast<CollisionEventComponent>(entityManager.getComponent(collisioneventsentity, EngineReservedComponents::COLLISION_EVENTS));
+    
     // Check for collisions between colliders
     for (size_t i = 0; i < collidersWithEntities.size() - 1; ++i) {
-        const auto& colliderA = std::get<0>(collidersWithEntities[i]);
-        const auto& entityA = std::get<1>(collidersWithEntities[i]);
+        auto colliderA = std::get<0>(collidersWithEntities[i]);
+        auto& entityA = std::get<1>(collidersWithEntities[i]);
 
         for (size_t j = i + 1; j < collidersWithEntities.size(); ++j) {
-            const auto& colliderB = std::get<0>(collidersWithEntities[j]);
-            const auto& entityB = std::get<1>(collidersWithEntities[j]);
-
+            auto colliderB = std::get<0>(collidersWithEntities[j]);
+            auto& entityB = std::get<1>(collidersWithEntities[j]);
+            auto posA = std::static_pointer_cast<PositionComponent>(entityManager.getComponent(entityA, EngineReservedComponents::POSITION));
+            auto posB = std::static_pointer_cast<PositionComponent>(entityManager.getComponent(entityB, EngineReservedComponents::POSITION));
+            
             if(colliderA->collidesWith(*colliderB)){
-                collisionEventComponent->events.push_back({entityA, colliderA, entityB, colliderB});
+                comp->events.push_back({entityA, colliderA, entityB, colliderB});
             }
         }
     }

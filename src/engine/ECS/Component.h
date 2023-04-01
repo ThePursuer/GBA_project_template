@@ -16,7 +16,9 @@ enum EngineReservedComponents : ComponentType{
         POSITION,
         SPRITE,
         STATIC_COLLIDER,
-        COLLISION_EVENTS
+        COLLISION_EVENTS,
+        PHYSICS_EVENTS,
+        RIGID_BODY
 };
 
 class IndexableComponentsComponent : public Component {
