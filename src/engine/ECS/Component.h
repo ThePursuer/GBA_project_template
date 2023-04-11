@@ -18,7 +18,9 @@ enum EngineReservedComponents : ComponentType{
         STATIC_COLLIDER,
         COLLISION_EVENTS,
         PHYSICS_EVENTS,
-        RIGID_BODY
+        RIGID_BODY,
+        SOUNDBANK,
+        SOUND_EFFECT
 };
 
 class IndexableComponentsComponent : public Component {

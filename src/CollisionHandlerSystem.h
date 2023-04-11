@@ -1,8 +1,8 @@
 #ifndef COLLISION_HANDLER_SYSTEM_H
 #define COLLISION_HANDLER_SYSTEM_H
 
-#include "Sprites/wizard_spritesheet_calciumtrice_indexed.h"
-#include "Sprites/shapes.h"
+#include "wizard_spritesheet_calciumtrice_indexed.h"
+#include "shapes.h"
 
 #include "engine/ECS/Components/EngineComponents.h"
 #include "engine/ECS/System.h"

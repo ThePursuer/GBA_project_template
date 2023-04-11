@@ -7,6 +7,8 @@
 
 #include <gba_types.h>
 
+#include <maxmod.h>
+
 #include "engine/Graphics/Sprite.h"
 #include "engine/Graphics/Animation.h"
 #include "engine/Math/Collider.h"
@@ -90,6 +92,18 @@ public:
     RigidBodyComponent(float mass): body(std::make_shared<Rigidbody>(mass)){}
     RigidBodyComponent(float mass, bool isKinematic): body(std::make_shared<Rigidbody>(mass, isKinematic)){}
     std::shared_ptr<Rigidbody> body;
+};
+
+class SoundEffectComponent: public Component{
+public:
+    mm_sound_effect effect;
+    bool isPlaying = false;
+};
+
+class SoundbankComponent: public Component{
+public:
+    mm_addr addr;
+    uint16_t channels;
 };
 
 #endif // ENGINE_COMPONENTS_H

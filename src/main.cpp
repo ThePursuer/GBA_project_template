@@ -7,8 +7,11 @@
 #include <stdio.h>
 #include <cassert>
 
-#include "Sprites/wizard_spritesheet_calciumtrice_indexed.h"
-#include "Sprites/shapes.h"
+#include "wizard_spritesheet_calciumtrice_indexed.h"
+#include "shapes.h"
+
+#include "soundbank.h"
+#include "soundbank_bin.h"
 
 #include "engine/Graphics/Sprite.h"
 #include "engine/Math/Collider.h"
@@ -25,6 +28,7 @@
 #include "engine/ECS/Systems/CollisionSystem.h"
 #include "engine/ECS/Systems/PhysicsSystem.h"
 #include "engine/ECS/Systems/PositionSystem.h"
+#include "engine/ECS/Systems/MusicSystem.h"
 
 
 #include "PlayerMovementSystem.h"
@@ -121,9 +125,19 @@ Entity generateBox(EntityManager & manager, u32 x, u32 y, u32 oam_id){
     return boxEntity;
 }
 
+Entity generateSoundbank(EntityManager& manager){
+    Entity sbEntity = manager.CreateEntity();
+    std::shared_ptr<SoundbankComponent> sbComp = std::make_shared<SoundbankComponent>();
+    sbComp->addr = (mm_addr)&soundbank_bin;
+    sbComp->channels = 8;
+    manager.addComponent(sbEntity, EngineReservedComponents::SOUNDBANK, COMPONENT_CAST(sbComp));
+    return sbEntity;
+}
+
 void initializeGBA(){
     // Initialize GBA and devkitPro libraries
     irqInit();
+	irqSet( IRQ_VBLANK, mmVBlank );
     irqEnable(IRQ_VBLANK);
 
 	// initialise the console
@@ -167,11 +181,14 @@ int main() {
         GAME_COMPONENTS::PLAYER_COMPONENT,
         GAME_COMPONENTS::PLAYER_INPUT_STATE_COMPONENT,
         EngineReservedComponents::RIGID_BODY,
-        EngineReservedComponents::PHYSICS_EVENTS
+        EngineReservedComponents::PHYSICS_EVENTS,
+        EngineReservedComponents::SOUNDBANK
     };
     EntityManager entityManager(indexableComponents);
+    
     Entity player = generatePlayer(entityManager);
     Entity box = generateBox(entityManager, 10, 10, 2);
+    Entity sbEntity = generateSoundbank(entityManager);
 
     SystemManager systemManager;
     AnimationSystem animationSystem;
@@ -182,6 +199,7 @@ int main() {
     PhysicsSystem physicsSystem(entityManager);
     CollisionHandlerSystem collisionHandlerSystem(player, box);
     PositionSystem positionSystem;
+    MusicSystem musicSystem;
 
     systemManager.addSystem(&inputSystem);
     systemManager.addSystem(&animationSystem);
@@ -191,9 +209,12 @@ int main() {
     systemManager.addSystem(&physicsSystem);
     systemManager.addSystem(&movementSystem);
     systemManager.addSystem(&positionSystem);
+    systemManager.addSystem(&musicSystem);
 
     // Initialize stuff
     systemManager.initializeAllSystems(entityManager);
+
+    musicSystem.queueMusic(MOD_WARLORD, mm_pmode::MM_PLAY_LOOP);
     animationSystem.playAnimation(entityManager, player, PLAYER_ANIMATIONS::IDLE, true);
 
     auto clock = GbaClock::instance();

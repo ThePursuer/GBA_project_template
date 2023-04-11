@@ -6,6 +6,9 @@ list(APPEND CMAKE_MODULE_PATH C:/devkitPro/cmake)
 include(GBA)
 include(Platform/NintendoGBA)
 
+link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 # Set the project name and version
 project(my_gba_project VERSION 1.0)
 

@@ -1,4 +1,10 @@
-build/*
-build/!.gitkeep
-bin/*
-bin/!.gitkeep
+build
+*.cmake
+CMakeCache.txt
+**CMakeFiles
+*.bin
+Makefile
+install_manifest.txt
+lib
+include
+.dkp-generated
