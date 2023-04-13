@@ -94,16 +94,15 @@ public:
     std::shared_ptr<Rigidbody> body;
 };
 
-class SoundEffectComponent: public Component{
-public:
-    mm_sound_effect effect;
-    bool isPlaying = false;
-};
-
 class SoundbankComponent: public Component{
 public:
     mm_addr addr;
     uint16_t channels;
+};
+
+class SoundFXComponent: public Component{
+public:
+    std::unordered_map<mm_word, mm_sound_effect> soundfx;
 };
 
 #endif // ENGINE_COMPONENTS_H

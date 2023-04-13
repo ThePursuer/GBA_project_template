@@ -1,7 +1,8 @@
 #include "PlayerMovementSystem.h"
 
-PlayerMovementSystem::PlayerMovementSystem(InputSystem& inputSystem){
+PlayerMovementSystem::PlayerMovementSystem(InputSystem& inputSystem, AudioSystem& audioSystem){
     registerInputs(inputSystem, *this);
+    registerSoundFX(audioSystem, *this);
 }
 
 void PlayerMovementSystem::initialize(EntityManager& entityManager) {
@@ -107,6 +108,7 @@ void PlayerMovementSystem::die(){
     playerInputStateComponent->changes.set(PlayerInputStateComponent::NEXT_ANIMATION);
 }
 
+
 void registerInputs(InputSystem& inputHandler, PlayerMovementSystem& pms){
     CONNECT_SIGNAL(inputHandler.getEventSignal(ButtonEventType::ButtonHeld, KEY_UP), &pms, &PlayerMovementSystem::moveUp);
     CONNECT_SIGNAL(inputHandler.getEventSignal(ButtonEventType::ButtonHeld, KEY_DOWN), &pms, &PlayerMovementSystem::moveDown);
@@ -120,7 +122,9 @@ void registerInputs(InputSystem& inputHandler, PlayerMovementSystem& pms){
 
     CONNECT_SIGNAL(inputHandler.getEventSignal(ButtonEventType::ButtonPressed, KEY_LEFT), &pms, &PlayerMovementSystem::turnLeft);
     CONNECT_SIGNAL(inputHandler.getEventSignal(ButtonEventType::ButtonPressed, KEY_RIGHT), &pms, &PlayerMovementSystem::turnRight);
+}
 
-    CONNECT_SIGNAL(inputHandler.getEventSignal(ButtonEventType::ButtonPressed, KEY_A), &pms, &PlayerMovementSystem::fireWand);
-    CONNECT_SIGNAL(inputHandler.getEventSignal(ButtonEventType::ButtonPressed, KEY_B), &pms, &PlayerMovementSystem::die);
+void registerSoundFX(AudioSystem& audioSystem, PlayerMovementSystem& pms){
+    CONNECT_SIGNAL(pms.playFX, &audioSystem, &AudioSystem::playFX);
+    CONNECT_SIGNAL(pms.stopFX, &audioSystem, &AudioSystem::cancelFX);
 }

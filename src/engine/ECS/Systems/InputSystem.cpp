@@ -15,9 +15,6 @@ Signal<>& __attribute__((section(".iwram"), long_call)) InputSystem::getEventSig
 
 void __attribute__((section(".iwram"), long_call)) InputSystem::update(EntityManager& entityManager, gba_microseconds deltaTime) {
     Entity player = entityManager.getEntitiesWithComponent(0)[0];
-    // auto spriteComponent = std::static_pointer_cast<SpriteComponent>(entityManager.getComponent(player, EngineReservedComponents::SPRITE));
-    // spriteComponent->sprite->setGFXIndex(0);
-    // spriteComponent->sprite->update();
 
     scanKeys();
     u16 keys_down = keysDown();

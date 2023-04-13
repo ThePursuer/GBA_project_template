@@ -28,7 +28,7 @@
 #include "engine/ECS/Systems/CollisionSystem.h"
 #include "engine/ECS/Systems/PhysicsSystem.h"
 #include "engine/ECS/Systems/PositionSystem.h"
-#include "engine/ECS/Systems/MusicSystem.h"
+#include "engine/ECS/Systems/AudioSystem.h"
 
 
 #include "PlayerMovementSystem.h"
@@ -65,7 +65,6 @@ Entity generatePlayer(EntityManager & manager){
         walk.collider = boxColliderComponent->collider;
         player_animations->clips.emplace(WALK, walk);
     }
-
 
     std::shared_ptr<SpriteComponent> player_sprite = std::make_shared<SpriteComponent>();
     player_sprite->sprite = std::make_unique<Sprite>(ATTR0_COLOR_16 | ATTR0_NORMAL | ATTR0_SQUARE,
@@ -134,6 +133,22 @@ Entity generateSoundbank(EntityManager& manager){
     return sbEntity;
 }
 
+Entity generateFX(EntityManager& manager){
+    Entity fxEntity = manager.CreateEntity();
+    std::shared_ptr<SoundFXComponent> fxComp = std::make_shared<SoundFXComponent>();
+    manager.addComponent(fxEntity, EngineReservedComponents::SOUND_EFFECT, fxComp);
+
+    // fxComp->soundfx[SFX_AMBULANCE] = mm_sound_effect{
+	// 	{ SFX_AMBULANCE } ,			// id
+	// 	(int)(1.0f * (1<<10)),	// rate
+	// 	0,		// handle
+	// 	255,	// volume
+	// 	0,		// panning
+	// };
+
+    return fxEntity;
+}
+
 void initializeGBA(){
     // Initialize GBA and devkitPro libraries
     irqInit();
@@ -182,24 +197,26 @@ int main() {
         GAME_COMPONENTS::PLAYER_INPUT_STATE_COMPONENT,
         EngineReservedComponents::RIGID_BODY,
         EngineReservedComponents::PHYSICS_EVENTS,
-        EngineReservedComponents::SOUNDBANK
+        EngineReservedComponents::SOUNDBANK,
+        EngineReservedComponents::SOUND_EFFECT
     };
     EntityManager entityManager(indexableComponents);
     
     Entity player = generatePlayer(entityManager);
     Entity box = generateBox(entityManager, 10, 10, 2);
     Entity sbEntity = generateSoundbank(entityManager);
+    Entity fxEntity = generateFX(entityManager);
 
     SystemManager systemManager;
     AnimationSystem animationSystem;
     SpriteSystem spriteSystem;
     InputSystem inputSystem;
-    PlayerMovementSystem movementSystem(inputSystem);
+    AudioSystem audioSystem;
+    PlayerMovementSystem movementSystem(inputSystem, audioSystem);
     CollisionSystem collisionSystem(entityManager);
     PhysicsSystem physicsSystem(entityManager);
     CollisionHandlerSystem collisionHandlerSystem(player, box);
     PositionSystem positionSystem;
-    MusicSystem musicSystem;
 
     systemManager.addSystem(&inputSystem);
     systemManager.addSystem(&animationSystem);
@@ -207,14 +224,14 @@ int main() {
     systemManager.addSystem(&collisionSystem);
     systemManager.addSystem(&collisionHandlerSystem);
     systemManager.addSystem(&physicsSystem);
+    systemManager.addSystem(&audioSystem);
     systemManager.addSystem(&movementSystem);
     systemManager.addSystem(&positionSystem);
-    systemManager.addSystem(&musicSystem);
 
     // Initialize stuff
     systemManager.initializeAllSystems(entityManager);
 
-    musicSystem.queueMusic(MOD_WARLORD, mm_pmode::MM_PLAY_LOOP);
+    audioSystem.queueMusic(MOD_WARLORD, mm_pmode::MM_PLAY_LOOP);
     animationSystem.playAnimation(entityManager, player, PLAYER_ANIMATIONS::IDLE, true);
 
     auto clock = GbaClock::instance();
@@ -224,7 +241,6 @@ int main() {
 
     while (1) {
         count++;
-
         auto now = clock.now();
         auto delta = std::chrono::duration_cast<gba_microseconds>(now - last_frame_time);
         last_frame_time = now;
@@ -233,11 +249,10 @@ int main() {
 
         auto deltad = clock.now() - now;
         if(count % 10 == 0){
-            iprintf("\033[17;0HFrame: %i     ", std::chrono::duration_cast<gba_milliseconds>(delta).count());
-            iprintf("\033[18;0HUpdate %i     ", std::chrono::duration_cast<gba_milliseconds>(deltad).count());
-            iprintf("\033[16;0HTime Elapsed: %i", std::chrono::duration_cast<gba_milliseconds>(clock.now().time_since_epoch()).count());
+            printf("\033[17;0HFrame: %i     ", std::chrono::duration_cast<gba_milliseconds>(delta).count());
+            printf("\033[18;0HUpdate %i     ", std::chrono::duration_cast<gba_milliseconds>(deltad).count());
+            printf("\033[16;0HTime Elapsed: %i", std::chrono::duration_cast<gba_milliseconds>(clock.now().time_since_epoch()).count());
         }
-
         // Wait for VBlank to avoid screen tearing
         VBlankIntrWait();
     }

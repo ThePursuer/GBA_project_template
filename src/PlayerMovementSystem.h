@@ -9,6 +9,8 @@
 #include "engine/ECS/Components/EngineComponents.h"
 #include "engine/ECS/Systems/InputSystem.h"
 #include "engine/ECS/Systems/AnimationSystem.h"
+#include "engine/ECS/Systems/AudioSystem.h"
+
 #include "Components.h"
 
 enum PLAYER_ANIMATIONS: u8{
@@ -36,7 +38,7 @@ public:
 
 class PlayerMovementSystem: public ISystem{
 public:
-    PlayerMovementSystem(InputSystem &inputSystem);
+    PlayerMovementSystem(InputSystem& inputSystem, AudioSystem& audioSystem);
     void initialize(EntityManager& entityManager);
     void update(EntityManager& entityManager, gba_microseconds deltaTime);
     void shutdown(EntityManager& entityManager);
@@ -51,11 +53,17 @@ public:
     void setIdle();
     void fireWand();
     void die();
+
+    Signal<mm_sfxhand&, mm_word> playFX;
+    Signal<mm_sfxhand> stopFX;
 private:
     Entity playerInputStateManager;
     std::shared_ptr<PlayerInputStateComponent> playerInputStateComponent;
+
+    mm_sfxhand ambhand;
 };
 
 void registerInputs(InputSystem& inputHandler, PlayerMovementSystem& pms);
+void registerSoundFX(AudioSystem& audioSystem, PlayerMovementSystem& pms);
 
 #endif // PLAYERMOVEMENTSYSTEM_H
