@@ -11,8 +11,7 @@ void SpriteSystem::update(EntityManager& entityManager, gba_microseconds deltaTi
     auto entities = entityManager.getEntitiesWithComponent(EngineReservedComponents::SPRITE);
     for (Entity entity : entities){
         auto spriteComponent = std::static_pointer_cast<SpriteComponent>(entityManager.getComponent(entity, EngineReservedComponents::SPRITE));
-        if (spriteComponent->needs_update)
-            spriteComponent->sprite->update();
+        spriteComponent->sprite->update();
     }
 }
 

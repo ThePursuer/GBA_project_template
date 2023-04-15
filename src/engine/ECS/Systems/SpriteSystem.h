@@ -8,7 +8,7 @@ class SpriteSystem: public ISystem{
 public:
     void initialize(EntityManager& entityManager);
     void IWRAM_CODE update(EntityManager& entityManager, gba_microseconds deltaTime);
-    void __attribute__((section("iwram"))) shutdown(EntityManager& entityManager);
+    void shutdown(EntityManager& entityManager);
     std::unordered_set<ComponentType> requiredComponents() const;
 
 };

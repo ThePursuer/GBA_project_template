@@ -23,6 +23,7 @@ public:
     void __attribute__((section(".iwram"), long_call)) addComponent(Entity entity, ComponentType componentType, std::shared_ptr<Component> component);
     void __attribute__((section(".iwram"), long_call)) removeComponent(Entity entity, ComponentType componentType);
     std::shared_ptr<Component> __attribute__((section(".iwram"), long_call)) getComponent(Entity entity, ComponentType componentType);
+    bool __attribute__((section(".iwram"), long_call)) hasComponent(Entity entity, ComponentType componentType);
     std::vector<Entity> __attribute__((section(".iwram"), long_call)) getEntitiesWithComponent(ComponentType type); // looks up entities with a component using entitiesByComponent_
     std::vector<Entity> __attribute__((section(".iwram"), long_call)) getEntitiesWithComponents(const std::unordered_set<ComponentType>& componentTypes);
 private:

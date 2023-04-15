@@ -7,13 +7,13 @@ void InputSystem::initialize(EntityManager& entityManager) {
     ICComponent->indexableComponents.insert(required.begin(), required.end());
 }
 
-Signal<>& __attribute__((section(".iwram"), long_call)) InputSystem::getEventSignal(ButtonEventType type, u32 key) {
+Signal<>& InputSystem::getEventSignal(ButtonEventType type, u32 key) {
     if (events.count(type) == 0 || events[type].count(key) == 0)
         events[type][key] = Signal<>();
     return events[type][key];
 }
 
-void __attribute__((section(".iwram"), long_call)) InputSystem::update(EntityManager& entityManager, gba_microseconds deltaTime) {
+void InputSystem::update(EntityManager& entityManager, gba_microseconds deltaTime) {
     Entity player = entityManager.getEntitiesWithComponent(0)[0];
 
     scanKeys();

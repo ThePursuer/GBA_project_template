@@ -17,7 +17,7 @@ class AudioSystem: public ISystem {
 public:
 
     void initialize(EntityManager& entityManager);
-    void update(EntityManager& entityManager, gba_microseconds deltaTime);
+    void IWRAM_CODE update(EntityManager& entityManager, gba_microseconds deltaTime);
     void shutdown(EntityManager& entityManager);
     std::unordered_set<ComponentType> requiredComponents() const;
 

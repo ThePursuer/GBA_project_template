@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <cassert>
 
+#include "chipmunk/chipmunk_private.h"
+
 #include "wizard_spritesheet_calciumtrice_indexed.h"
 #include "shapes.h"
 
@@ -14,8 +16,6 @@
 #include "soundbank_bin.h"
 
 #include "engine/Graphics/Sprite.h"
-#include "engine/Math/Collider.h"
-#include "engine/Math/ColliderI.h"
 #include "engine/Signal.h"
 #include "engine/Graphics/SpriteManager.h"
 
@@ -25,16 +25,14 @@
 #include "engine/ECS/Systems/AnimationSystem.h"
 #include "engine/ECS/Systems/InputSystem.h"
 #include "engine/ECS/Systems/SpriteSystem.h"
-#include "engine/ECS/Systems/CollisionSystem.h"
-#include "engine/ECS/Systems/PhysicsSystem.h"
 #include "engine/ECS/Systems/PositionSystem.h"
 #include "engine/ECS/Systems/AudioSystem.h"
-
+#include "engine/ECS/Systems/PhysicsSystem.h"
 
 #include "PlayerMovementSystem.h"
-#include "CollisionHandlerSystem.h"
 
 u32 shapes;
+cpSpace* IWRAM_DATA space;
 
 Entity generatePlayer(EntityManager & manager){
     std::shared_ptr<PositionComponent> player_position = std::make_shared<PositionComponent>();
@@ -43,10 +41,6 @@ Entity generatePlayer(EntityManager & manager){
     player_position->superPositionX = 80;
     player_position->superPositionY = 80;
 
-    std::shared_ptr<StaticColliderComponent> boxColliderComponent = std::make_shared<StaticColliderComponent>();
-
-    boxColliderComponent->collider = std::make_shared<Rectangle>(8, 0, 16, 32, *player_position);
-
     std::shared_ptr<AnimationClipComponent> player_animations = std::make_shared<AnimationClipComponent>();
     {
         AnimationClip idle;
@@ -54,7 +48,6 @@ Entity generatePlayer(EntityManager & manager){
         idle.frameCount = 10;
         idle.graphicsData = (unsigned short*)&wizard_spritesheet_calciumtrice_indexedTiles;
         idle.graphicsDataLen = wizard_spritesheet_calciumtrice_indexedTilesLen / 5;
-        idle.collider = boxColliderComponent->collider;
         player_animations->clips.emplace(IDLE, idle);
 
         AnimationClip walk;
@@ -62,7 +55,6 @@ Entity generatePlayer(EntityManager & manager){
         walk.frameCount = 10;
         walk.graphicsData = ((unsigned short*)&wizard_spritesheet_calciumtrice_indexedTiles) + wizard_spritesheet_calciumtrice_indexedTilesLen / 5 ;
         walk.graphicsDataLen = wizard_spritesheet_calciumtrice_indexedTilesLen / 5;
-        walk.collider = boxColliderComponent->collider;
         player_animations->clips.emplace(WALK, walk);
     }
 
@@ -77,11 +69,21 @@ Entity generatePlayer(EntityManager & manager){
 
     Entity player = manager.CreateEntity();
 
-    std::shared_ptr<RigidBodyComponent> rigidBodyComponent = std::make_shared<RigidBodyComponent>(1);
-    rigidBodyComponent->body->setFrictionCoefficient(100.0);
+    std::shared_ptr<PhysicsComponent> physicsComponent = std::make_shared<PhysicsComponent>();
 
-    manager.addComponent(player, EngineReservedComponents::RIGID_BODY, rigidBodyComponent);
-    manager.addComponent(player, EngineReservedComponents::STATIC_COLLIDER, boxColliderComponent);
+    PhysicsStructure idleForm;
+    cpFloat width = 32, height = 32;
+    idleForm.body = std::shared_ptr<cpBody>(cpBodyNew(10, cpMomentForBox(10, width, height)));
+    idleForm.shape = std::shared_ptr<cpShape>(cpBoxShapeNew(idleForm.body.get(), height, width, 0));
+
+    cpShapeSetFriction(idleForm.shape.get(), 0.5);
+    cpShapeSetElasticity(idleForm.shape.get(), 0.3);
+    cpBodySetPosition(idleForm.body.get(), cpv(player_position->superPositionX, player_position->superPositionY)); // Set the body's position
+
+    physicsComponent->currentForm = 0;
+    physicsComponent->forms[0] = idleForm;
+
+    manager.addComponent(player, EngineReservedComponents::PHYSICS, physicsComponent);
     manager.addComponent(player, EngineReservedComponents::ANIMATION_CLIP, player_animations);
     manager.addComponent(player, EngineReservedComponents::SPRITE, player_sprite);
     manager.addComponent(player, EngineReservedComponents::POSITION, player_position);
@@ -89,7 +91,7 @@ Entity generatePlayer(EntityManager & manager){
 
     return player;
 }
-std::shared_ptr<StaticColliderComponent> boxColliderComponent;
+
 Entity generateBox(EntityManager & manager, u32 x, u32 y, u32 oam_id){
     Entity boxEntity = manager.CreateEntity();
 
@@ -109,17 +111,28 @@ Entity generateBox(EntityManager & manager, u32 x, u32 y, u32 oam_id){
     boxSprite->sprite->setGFXIndex(1);
     boxSprite->needs_update = true;
 
-    boxColliderComponent = std::make_shared<StaticColliderComponent>();
-    boxColliderComponent->collider = std::make_shared<Rectangle>(0, 0, 32, 32, *positionComponent);
+    std::shared_ptr<PhysicsComponent> physicsComponent = std::make_shared<PhysicsComponent>();
 
-    std::shared_ptr<RigidBodyComponent> rigidBodyComponent = std::make_shared<RigidBodyComponent>(1, true);
-    rigidBodyComponent->body->setFrictionCoefficient(100.0);
-    rigidBodyComponent->body->setDrag(10);
+    PhysicsStructure idleForm;
+    cpFloat width = 32, height = 32;
+    idleForm.body = std::shared_ptr<cpBody>(cpBodyNew(10, cpMomentForBox(10, width, height)));
+    idleForm.shape = std::shared_ptr<cpShape>(cpBoxShapeNew(idleForm.body.get(), height, width, 0));
 
-    manager.addComponent(boxEntity, EngineReservedComponents::RIGID_BODY, rigidBodyComponent);
+    cpShapeSetFriction(idleForm.shape.get(), 0.5);
+    cpShapeSetElasticity(idleForm.shape.get(), 0.3);
+    cpBodySetPosition(idleForm.body.get(), cpv(positionComponent->superPositionX, positionComponent->superPositionY)); // Set the body's position
+
+    physicsComponent->currentForm = 0;
+    physicsComponent->forms[0] = idleForm;
+
+    cpVect imp;
+    imp.x = 1;
+    imp.y = 0;
+    cpBodyApplyImpulseAtWorldPoint(idleForm.body.get(), imp, idleForm.body->p);
+
+    manager.addComponent(boxEntity, EngineReservedComponents::PHYSICS, physicsComponent);
     manager.addComponent(boxEntity, EngineReservedComponents::SPRITE, boxSprite);
     manager.addComponent(boxEntity, EngineReservedComponents::POSITION, positionComponent);
-    manager.addComponent(boxEntity, EngineReservedComponents::STATIC_COLLIDER, boxColliderComponent);
 
     return boxEntity;
 }
@@ -189,16 +202,13 @@ int main() {
     // Create stuff
     std::unordered_set<ComponentType> indexableComponents = {
         EngineReservedComponents::ANIMATION_CLIP,
-        EngineReservedComponents::STATIC_COLLIDER,
         EngineReservedComponents::POSITION,
         EngineReservedComponents::SPRITE,
-        EngineReservedComponents::COLLISION_EVENTS,
         GAME_COMPONENTS::PLAYER_COMPONENT,
         GAME_COMPONENTS::PLAYER_INPUT_STATE_COMPONENT,
-        EngineReservedComponents::RIGID_BODY,
-        EngineReservedComponents::PHYSICS_EVENTS,
         EngineReservedComponents::SOUNDBANK,
-        EngineReservedComponents::SOUND_EFFECT
+        EngineReservedComponents::SOUND_EFFECT,
+        EngineReservedComponents::PHYSICS
     };
     EntityManager entityManager(indexableComponents);
     
@@ -213,20 +223,16 @@ int main() {
     InputSystem inputSystem;
     AudioSystem audioSystem;
     PlayerMovementSystem movementSystem(inputSystem, audioSystem);
-    CollisionSystem collisionSystem(entityManager);
-    PhysicsSystem physicsSystem(entityManager);
-    CollisionHandlerSystem collisionHandlerSystem(player, box);
+    PhysicsSystem physicsSystem;
     PositionSystem positionSystem;
 
     systemManager.addSystem(&inputSystem);
     systemManager.addSystem(&animationSystem);
-    systemManager.addSystem(&spriteSystem);
-    systemManager.addSystem(&collisionSystem);
-    systemManager.addSystem(&collisionHandlerSystem);
-    systemManager.addSystem(&physicsSystem);
     systemManager.addSystem(&audioSystem);
     systemManager.addSystem(&movementSystem);
+    systemManager.addSystem(&physicsSystem);
     systemManager.addSystem(&positionSystem);
+    systemManager.addSystem(&spriteSystem);
 
     // Initialize stuff
     systemManager.initializeAllSystems(entityManager);
@@ -236,22 +242,32 @@ int main() {
 
     auto clock = GbaClock::instance();
     auto last_frame_time = clock.now();
-    // // Main game loop
-    u32 count = 0;
+    
+	space = cpSpaceNew();
+	space->iterations = 1;
+    space->collisionSlop = 0;
+    space->collisionBias = 0;
+    // space->idleSpeedThreshold = 1;
+    // space->sleepTimeThreshold = 0.1;
+    space->damping = 0.2;
 
+    PhysicsSystem::updatePhysicsForm(entityManager, player, 0, space);
+    PhysicsSystem::updatePhysicsForm(entityManager, box, 0, space);
+
+    // Main game loop
+    u32 count = 0;
     while (1) {
         count++;
         auto now = clock.now();
         auto delta = std::chrono::duration_cast<gba_microseconds>(now - last_frame_time);
         last_frame_time = now;
-
         systemManager.updateAllSystems(entityManager, delta);
+        cpSpaceStep(space, (std::chrono::duration_cast<gba_milliseconds>(delta).count() / cpFloat(1000.0)));
 
         auto deltad = clock.now() - now;
         if(count % 10 == 0){
             printf("\033[17;0HFrame: %i     ", std::chrono::duration_cast<gba_milliseconds>(delta).count());
             printf("\033[18;0HUpdate %i     ", std::chrono::duration_cast<gba_milliseconds>(deltad).count());
-            printf("\033[16;0HTime Elapsed: %i", std::chrono::duration_cast<gba_milliseconds>(clock.now().time_since_epoch()).count());
         }
         // Wait for VBlank to avoid screen tearing
         VBlankIntrWait();

@@ -13,22 +13,19 @@ void PlayerMovementSystem::initialize(EntityManager& entityManager) {
 
 void PlayerMovementSystem::update(EntityManager& entityManager, gba_microseconds deltaTime) {
     Entity player = entityManager.getEntitiesWithComponent(GAME_COMPONENTS::PLAYER_COMPONENT)[0];
-    auto rigidBodyComp = std::static_pointer_cast<RigidBodyComponent>(entityManager.getComponent(player, EngineReservedComponents::RIGID_BODY));
+    auto physicsComponent = std::static_pointer_cast<PhysicsComponent>(entityManager.getComponent(player, EngineReservedComponents::PHYSICS));
     auto positionComponent = std::static_pointer_cast<PositionComponent>(entityManager.getComponent(player, EngineReservedComponents::POSITION));
+    PhysicsStructure& currentForm = physicsComponent->forms[physicsComponent->currentForm];
 
     if(playerInputStateComponent->changes.any()){
         auto spriteComponent = std::static_pointer_cast<SpriteComponent>(entityManager.getComponent(player, EngineReservedComponents::SPRITE));
 
-        if(playerInputStateComponent->changes[PlayerInputStateComponent::DELTAX] && playerInputStateComponent->changes[PlayerInputStateComponent::DELTAY]){
-            rigidBodyComp->body->applyImpulse(float(playerInputStateComponent->deltaX) * 0.7, float(playerInputStateComponent->deltaY) * 0.7);
-            // Make the movement feel less like you slow down while walking diagonally without affecting physics.
-            positionComponent->superPositionX += float(playerInputStateComponent->deltaX) * 0.3;
-            positionComponent->superPositionY += float(playerInputStateComponent->deltaY) * 0.3;
-        }
-        else if(playerInputStateComponent->changes[PlayerInputStateComponent::DELTAX])
-            rigidBodyComp->body->applyImpulse(playerInputStateComponent->deltaX, 0);
-        else if(playerInputStateComponent->changes[PlayerInputStateComponent::DELTAY])
-            rigidBodyComp->body->applyImpulse(0, playerInputStateComponent->deltaY);
+        cpVect translation;
+        translation.x = (playerInputStateComponent->changes[PlayerInputStateComponent::DELTAX]) ? float(playerInputStateComponent->deltaX) * 10 : 0;
+        translation.y = (playerInputStateComponent->changes[PlayerInputStateComponent::DELTAY]) ? float(playerInputStateComponent->deltaY) * 10 : 0;
+
+        if(translation.x || translation.y)
+            cpBodyApplyImpulseAtWorldPoint(currentForm.body.get(), translation, currentForm.body->p);
 
         if(playerInputStateComponent->changes[PlayerInputStateComponent::FLIPX])
             spriteComponent->sprite->flipX(playerInputStateComponent->flipX);
@@ -37,9 +34,6 @@ void PlayerMovementSystem::update(EntityManager& entityManager, gba_microseconds
         spriteComponent->needs_update = true;
         playerInputStateComponent->changes.reset();
     }
-
-    positionComponent->superPositionX += rigidBodyComp->body->getVelocityX();
-    positionComponent->superPositionY += rigidBodyComp->body->getVelocityY();
 }
 
 void PlayerMovementSystem::shutdown(EntityManager& entityManager) {
