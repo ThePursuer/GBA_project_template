@@ -12,13 +12,10 @@ class Component {}; // Inherit from me!!
 enum EngineReservedComponents : ComponentType{
         INDEXABLE_COMPONENTS_COMPONENT = 10000,
         ANIMATION_CLIP,
-        COLLIDERS,
         POSITION,
+        PHYSICS,
+        SPACIAL,
         SPRITE,
-        STATIC_COLLIDER,
-        COLLISION_EVENTS,
-        PHYSICS_EVENTS,
-        RIGID_BODY,
         SOUNDBANK,
         SOUND_EFFECT
 };

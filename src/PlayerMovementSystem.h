@@ -13,7 +13,7 @@
 
 #include "Components.h"
 
-enum PLAYER_ANIMATIONS: u8{
+enum PLAYER_ANIMATIONS: u8 {
     IDLE = 1,
     WALK,
     FIRE,
@@ -38,7 +38,7 @@ public:
 
 class PlayerMovementSystem: public ISystem{
 public:
-    PlayerMovementSystem(InputSystem& inputSystem, AudioSystem& audioSystem);
+    PlayerMovementSystem(InputSystem& inputSystem);
     void initialize(EntityManager& entityManager);
     void update(EntityManager& entityManager, gba_microseconds deltaTime);
     void shutdown(EntityManager& entityManager);
@@ -54,16 +54,11 @@ public:
     void fireWand();
     void die();
 
-    Signal<mm_sfxhand&, mm_word> playFX;
-    Signal<mm_sfxhand> stopFX;
 private:
     Entity playerInputStateManager;
     std::shared_ptr<PlayerInputStateComponent> playerInputStateComponent;
-
-    mm_sfxhand ambhand;
 };
 
 void registerInputs(InputSystem& inputHandler, PlayerMovementSystem& pms);
-void registerSoundFX(AudioSystem& audioSystem, PlayerMovementSystem& pms);
 
 #endif // PLAYERMOVEMENTSYSTEM_H

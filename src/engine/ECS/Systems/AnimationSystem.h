@@ -12,13 +12,13 @@
 class AnimationSystem : public ISystem {
 public:
     void initialize(EntityManager& entityManager) override;
-    void IWRAM_CODE update(EntityManager& entityManager, gba_microseconds deltaTime);
-    static void IWRAM_CODE playAnimation(EntityManager& entityManager, Entity entity, AnimationName name, bool loop);
-    static void IWRAM_CODE stopAnimation(EntityManager& entityManager, Entity entity);
+    void update(EntityManager& entityManager, gba_microseconds deltaTime);
+    static void playAnimation(EntityManager& entityManager, Entity entity, AnimationName name, bool loop);
+    static void stopAnimation(EntityManager& entityManager, Entity entity);
     void shutdown(EntityManager& entityManager) override {}
     std::unordered_set<ComponentType> requiredComponents() const override;
 private:
-    static void IWRAM_CODE stopAnimation(std::shared_ptr<AnimationClipComponent> animationComponent, std::shared_ptr<SpriteComponent> spriteComponent);
+    static void stopAnimation(std::shared_ptr<AnimationClipComponent> animationComponent, std::shared_ptr<SpriteComponent> spriteComponent);
 };
 
 #endif // ANIMATION_SYSTEM_H

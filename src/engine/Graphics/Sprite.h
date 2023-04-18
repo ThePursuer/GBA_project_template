@@ -10,16 +10,16 @@
 
 class Sprite {
 public:
-    IWRAM_CODE Sprite(u16 attr0, u16 attr1, u16 attr2, u32 id, const Position& position);
+    Sprite(u16 attr0, u16 attr1, u16 attr2, u32 id, const Position& position);
 
-    IWRAM_CODE ~Sprite(); // Removes OAM entry
-    void IWRAM_CODE update();
-    void IWRAM_CODE setGFXIndex(u32 index);
-    const IWRAM_CODE s32 getX() const {return position_.getX();}
-    const IWRAM_CODE s32 getY() const {return position_.getY();}
-    const IWRAM_CODE s32 getObjIndexIncrement() const {return objIndexIncrement_;}
-    void IWRAM_CODE flipX(bool val);
-    void IWRAM_CODE flipY(bool val);
+    ~Sprite(); // Removes OAM entry
+    void update();
+    void setGFXIndex(u32 index);
+    const s32 getX() const {return position_.getX();}
+    const s32 getY() const {return position_.getY();}
+    const s32 getObjIndexIncrement() const {return objIndexIncrement_;}
+    void flipX(bool val);
+    void flipY(bool val);
 
 protected:
     /**

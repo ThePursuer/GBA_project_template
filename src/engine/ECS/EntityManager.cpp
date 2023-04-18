@@ -10,13 +10,13 @@ EntityManager::EntityManager(std::unordered_set<ComponentType> indexableComponen
 
 EntityManager::~EntityManager() {}
 
-__attribute__((section(".iwram"), long_call)) Entity EntityManager::CreateEntity() {
+Entity EntityManager::CreateEntity() {
     Entity newEntity = nextEntity_;
     nextEntity_++;
     return newEntity;
 }
 
-void __attribute__((section(".iwram"), long_call)) EntityManager::destroyEntity(Entity entity) {
+void EntityManager::destroyEntity(Entity entity) {
     for (auto const& [componentType, component] : entityComponents_[entity]) {
         if (indexableComponentTypes_->indexableComponents.count(componentType) > 0) {
             auto& entities = entitiesByComponent_[componentType];
@@ -27,14 +27,14 @@ void __attribute__((section(".iwram"), long_call)) EntityManager::destroyEntity(
     entityComponents_.erase(entity);
 }
 
-void __attribute__((section(".iwram"), long_call)) EntityManager::addComponent(Entity entity, ComponentType componentType, std::shared_ptr<Component> component) {
+void EntityManager::addComponent(Entity entity, ComponentType componentType, std::shared_ptr<Component> component) {
     entityComponents_[entity][componentType] = component;
     if (indexableComponentTypes_->indexableComponents.count(componentType) > 0) {
         entitiesByComponent_[componentType].push_back(entity);
     }
 }
 
-void __attribute__((section(".iwram"), long_call)) EntityManager::removeComponent(Entity entity, ComponentType componentType) {
+void EntityManager::removeComponent(Entity entity, ComponentType componentType) {
     entityComponents_[entity].erase(componentType);
     if (indexableComponentTypes_->indexableComponents.count(componentType) > 0) {
         auto& entities = entitiesByComponent_[componentType];
@@ -43,18 +43,22 @@ void __attribute__((section(".iwram"), long_call)) EntityManager::removeComponen
     }
 }
 
-std::shared_ptr<Component> __attribute__((section(".iwram"), long_call)) EntityManager::getComponent(Entity entity, ComponentType componentType) {
+bool EntityManager::hasComponent(Entity entity, ComponentType component){
+    return entityComponents_[entity].find(component) != entityComponents_[entity].end();
+}
+
+std::shared_ptr<Component> EntityManager::getComponent(Entity entity, ComponentType componentType) {
     return entityComponents_[entity][componentType]; // Assume the caller knows what they are talking about
 }
 
-std::vector<Entity> __attribute__((section(".iwram"), long_call)) EntityManager::getEntitiesWithComponent(ComponentType type) {
+std::vector<Entity> EntityManager::getEntitiesWithComponent(ComponentType type) {
     if (indexableComponentTypes_->indexableComponents.count(type) > 0) {
         return entitiesByComponent_[type];
     }
     return std::vector<Entity>();
 }
 
-std::vector<Entity> __attribute__((section(".iwram"), long_call)) EntityManager::getEntitiesWithComponents(const std::unordered_set<ComponentType>& componentTypes) {
+std::vector<Entity> EntityManager::getEntitiesWithComponents(const std::unordered_set<ComponentType>& componentTypes) {
     std::vector<Entity> result;
 
     // Get the smallest entity list to minimize iterations

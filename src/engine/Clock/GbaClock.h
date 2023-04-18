@@ -23,16 +23,16 @@ public:
 
     static GbaClock& instance();
 
-    std::chrono::time_point<GbaClock> IWRAM_CODE now() noexcept;
+    std::chrono::time_point<GbaClock> now() noexcept;
 
-    void IWRAM_CODE handle_interrupt();
+    void handle_interrupt();
 
 private:
     static u32 rollovers;
 
     GbaClock();
 
-    static void IWRAM_CODE irq_handler();
+    static void irq_handler();
 };
 
 #endif // GBA_CLOCK

@@ -1,8 +1,7 @@
 #include "PlayerMovementSystem.h"
 
-PlayerMovementSystem::PlayerMovementSystem(InputSystem& inputSystem, AudioSystem& audioSystem){
+PlayerMovementSystem::PlayerMovementSystem(InputSystem& inputSystem){
     registerInputs(inputSystem, *this);
-    registerSoundFX(audioSystem, *this);
 }
 
 void PlayerMovementSystem::initialize(EntityManager& entityManager) {
@@ -13,22 +12,19 @@ void PlayerMovementSystem::initialize(EntityManager& entityManager) {
 
 void PlayerMovementSystem::update(EntityManager& entityManager, gba_microseconds deltaTime) {
     Entity player = entityManager.getEntitiesWithComponent(GAME_COMPONENTS::PLAYER_COMPONENT)[0];
-    auto rigidBodyComp = std::static_pointer_cast<RigidBodyComponent>(entityManager.getComponent(player, EngineReservedComponents::RIGID_BODY));
+    auto spacialComponent = std::static_pointer_cast<SpacialComponent>(entityManager.getComponent(player, EngineReservedComponents::SPACIAL));
     auto positionComponent = std::static_pointer_cast<PositionComponent>(entityManager.getComponent(player, EngineReservedComponents::POSITION));
 
     if(playerInputStateComponent->changes.any()){
         auto spriteComponent = std::static_pointer_cast<SpriteComponent>(entityManager.getComponent(player, EngineReservedComponents::SPRITE));
 
         if(playerInputStateComponent->changes[PlayerInputStateComponent::DELTAX] && playerInputStateComponent->changes[PlayerInputStateComponent::DELTAY]){
-            rigidBodyComp->body->applyImpulse(float(playerInputStateComponent->deltaX) * 0.7, float(playerInputStateComponent->deltaY) * 0.7);
-            // Make the movement feel less like you slow down while walking diagonally without affecting physics.
-            positionComponent->superPositionX += float(playerInputStateComponent->deltaX) * 0.3;
-            positionComponent->superPositionY += float(playerInputStateComponent->deltaY) * 0.3;
+            spacialComponent->body->applyImpulse(fix16_from_float(float(playerInputStateComponent->deltaX) * 7), fix16_from_float(float(playerInputStateComponent->deltaY) * 7));
         }
         else if(playerInputStateComponent->changes[PlayerInputStateComponent::DELTAX])
-            rigidBodyComp->body->applyImpulse(playerInputStateComponent->deltaX, 0);
+            spacialComponent->body->applyImpulse(fix16_from_int(playerInputStateComponent->deltaX * 10), F16(0));
         else if(playerInputStateComponent->changes[PlayerInputStateComponent::DELTAY])
-            rigidBodyComp->body->applyImpulse(0, playerInputStateComponent->deltaY);
+            spacialComponent->body->applyImpulse(F16(0), fix16_from_int(playerInputStateComponent->deltaY * 10));
 
         if(playerInputStateComponent->changes[PlayerInputStateComponent::FLIPX])
             spriteComponent->sprite->flipX(playerInputStateComponent->flipX);
@@ -37,9 +33,12 @@ void PlayerMovementSystem::update(EntityManager& entityManager, gba_microseconds
         spriteComponent->needs_update = true;
         playerInputStateComponent->changes.reset();
     }
-
-    positionComponent->superPositionX += rigidBodyComp->body->getVelocityX();
-    positionComponent->superPositionY += rigidBodyComp->body->getVelocityY();
+    static int count = 0;
+    if(count% 10 == 0){
+    auto vel = spacialComponent->body->getVelocity();
+    auto pos = spacialComponent->body->getPosition();
+    }
+    count ++;
 }
 
 void PlayerMovementSystem::shutdown(EntityManager& entityManager) {
@@ -122,9 +121,4 @@ void registerInputs(InputSystem& inputHandler, PlayerMovementSystem& pms){
 
     CONNECT_SIGNAL(inputHandler.getEventSignal(ButtonEventType::ButtonPressed, KEY_LEFT), &pms, &PlayerMovementSystem::turnLeft);
     CONNECT_SIGNAL(inputHandler.getEventSignal(ButtonEventType::ButtonPressed, KEY_RIGHT), &pms, &PlayerMovementSystem::turnRight);
-}
-
-void registerSoundFX(AudioSystem& audioSystem, PlayerMovementSystem& pms){
-    CONNECT_SIGNAL(pms.playFX, &audioSystem, &AudioSystem::playFX);
-    CONNECT_SIGNAL(pms.stopFX, &audioSystem, &AudioSystem::cancelFX);
 }

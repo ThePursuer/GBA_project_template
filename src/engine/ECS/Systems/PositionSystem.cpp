@@ -8,8 +8,17 @@ void PositionSystem::update(EntityManager& entityManager, gba_microseconds delta
     auto positionalEntities = entityManager.getEntitiesWithComponent(EngineReservedComponents::POSITION);
     for(auto& entity: positionalEntities){
         auto positionComponent  = std::static_pointer_cast<PositionComponent>(entityManager.getComponent(entity, EngineReservedComponents::POSITION));
-        positionComponent->x = positionComponent->getSuperPositionX();
-        positionComponent->y = positionComponent->getSuperPositionY();
+        if (positionComponent->changed) {
+            if (entityManager.hasComponent(entity, EngineReservedComponents::SPRITE)){
+                auto spriteComponent = std::static_pointer_cast<SpriteComponent>(entityManager.getComponent(entity, EngineReservedComponents::SPRITE));
+                spriteComponent->needs_update = true;
+            }
+            positionComponent->changed = false;
+        }
+        
+        // Always update if we have a physics related item
+        if (positionComponent->position_)
+            positionComponent->setPosition(*positionComponent->position_);
     }
 }
 

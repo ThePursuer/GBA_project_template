@@ -13,8 +13,8 @@
 class InputSystem : public ISystem{
 public:
     void initialize(EntityManager& entityManager);
-    Signal<>& IWRAM_CODE getEventSignal(ButtonEventType type, u32 key); // get signal associated with button press
-    void IWRAM_CODE update(EntityManager& entityManager, gba_microseconds deltaTime);
+    Signal<>& getEventSignal(ButtonEventType type, u32 key); // get signal associated with button press
+    void update(EntityManager& entityManager, gba_microseconds deltaTime);
     void shutdown(EntityManager& entityManager);
     std::unordered_set<ComponentType> requiredComponents() const;
 private:

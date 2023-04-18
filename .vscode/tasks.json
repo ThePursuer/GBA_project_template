@@ -39,9 +39,23 @@
 			"dependsOn": "Clean GBA Project"
         },
 		{
-            "label": "Clean GBA Project",
+            "label": "Compile GBA Project",
             "type": "shell",
-            "command": "make clean",
+            "command": "make",
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+			"group": "build",
+            "problemMatcher": [],
+			"dependsOn": "Clean GBA Project"
+        },
+		{
+            "label": "Compile GBA Project: threaded",
+            "type": "shell",
+            "command": "make",
+			"args": [
+				"-j6"
+			],
             "options": {
                 "cwd": "${workspaceFolder}/build"
             },
