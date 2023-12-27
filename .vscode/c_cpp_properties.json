@@ -3,13 +3,11 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**",
                 "C:\\devkitPro\\libgba\\include",
                 "C:\\devkitPro\\devkitARM\\arm-none-eabi\\include",
-                "C:\\devkitPro\\devkitARM\\arm-none-eabi\\include\\c++\\12.2.0",
-                "C:\\devkitPro\\devkitARM\\arm-none-eabi\\include\\c++\\12.2.0\\arm-none-eabi",
-                "C:\\devkitPro\\devkitARM\\lib\\gcc\\arm-none-eabi\\12.2.0\\include",
-                "C:\\Users\\peter\\Development\\libfixmath\\libfixmath"
+                "C:\\devkitPro\\devkitARM\\lib\\gcc\\arm-none-eabi\\13.2.0\\include",
+                "C:\\Users\\peter\\Development\\libfixmath\\libfixmath",
+                "${workspaceFolder}\\build\\_deps\\libfixmath-src"
             ],
             "defines": [
                 "_DEBUG",

@@ -60,6 +60,7 @@
         "unordered_set": "cpp",
         "bitset": "cpp",
         "cstring": "cpp",
-        "set": "cpp"
+        "set": "cpp",
+        "optional": "cpp"
     }
 }
