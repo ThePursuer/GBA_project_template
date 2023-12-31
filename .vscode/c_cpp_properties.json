@@ -7,7 +7,7 @@
                 "C:\\devkitPro\\devkitARM\\lib\\gcc\\arm-none-eabi\\12.2.0\\include",
                 "${workspaceFolder}\\build\\_deps\\libfixmath-src",
                 "C:\\devkitPro\\devkitARM\\arm-none-eabi\\include",
-                "C:\\devkitPro\\devkitARM\\arm-none-eabi\\include\\c++\\12.2.0"
+                "C:\\devkitPro\\devkitARM\\arm-none-eabi\\include\\c++\\12.2.0\\**"
             ],
             "defines": [
                 "_DEBUG",

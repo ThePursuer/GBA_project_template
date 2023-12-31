@@ -61,6 +61,9 @@
         "bitset": "cpp",
         "cstring": "cpp",
         "set": "cpp",
-        "optional": "cpp"
+        "optional": "cpp",
+        "ios": "cpp",
+        "iostream": "cpp",
+        "cinttypes": "cpp"
     }
 }

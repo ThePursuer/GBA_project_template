@@ -9,11 +9,22 @@ include($ENV{DEVKITPRO}/cmake/Platform/NintendoGBA.cmake)
 # Set the project name and version
 project(my_gba_project VERSION 1.0)
 
-
 FetchContent_Declare(
   libfixmath
-  URL      https://codeload.github.com/PetteriAimonen/libfixmath/zip/d308e466e1a09118d03f677c52e5fbf402f6fdd0
+  GIT_REPOSITORY https://github.com/PetteriAimonen/libfixmath
+  GIT_TAG d308e466e1a09118d03f677c52e5fbf402f6fdd0
+  PATCH_COMMAND git apply /home/peter/GBA_project_template/patches/libfixmath.patch
 )
 FetchContent_MakeAvailable(libfixmath)
+
+target_compile_definitions(libfixmath PRIVATE
+    FIXMATH_FAST_SIN
+    FIXMATH_NO_64BIT
+    # FIXMATH_NO_CACHE
+    FIXMATH_NO_HARD_DIVISION
+    # FIXMATH_NO_OVERFLOW
+    # FIXMATH_NO_ROUNDING
+    # FIXMATH_OPTIMIZE_8BIT
+)
 
 add_subdirectory(src)
