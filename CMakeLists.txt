@@ -17,7 +17,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(libfixmath)
 
-target_compile_definitions(libfixmath PRIVATE
+target_compile_definitions(libfixmath PUBLIC
     FIXMATH_FAST_SIN
     FIXMATH_NO_64BIT
     # FIXMATH_NO_CACHE
@@ -26,5 +26,7 @@ target_compile_definitions(libfixmath PRIVATE
     # FIXMATH_NO_ROUNDING
     # FIXMATH_OPTIMIZE_8BIT
 )
+
+set(CMAKE_CXX_STANDARD 20)
 
 add_subdirectory(src)

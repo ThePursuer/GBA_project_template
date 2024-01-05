@@ -13,10 +13,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <malloc.h>
+#include <stdio.h>
+
+#include "GBA_OS/Clock/GbaClock.h"
 
 #include <libfixmath/fixmath.h>
-
-// #include <libfixmath/fixmath.h>
 
 void initializeGBA(){
     // Initialize GBA and devkitPro libraries
@@ -43,24 +44,21 @@ void initializeGBA(){
     // Set up the video mode and enable sprites
     SetMode(MODE_0 | BG0_ON | OBJ_ENABLE | OBJ_1D_MAP);
 }
-// -T gba_cart.ld%s
-// rm -r build/ && /opt/devkitpro/portlibs/gba/bin/arm-none-eabi-cmake -B build -S . && make -C build
+
 int main() {
     initializeGBA();
 
+    GbaClock& clock = GbaClock::instance();
+
+    volatile uint32_t count = 0;
+    
     while (1) {
-		char * str = (char*)malloc(sizeof("Hello from IWRAM!"));
-		memcpy(str, "Hello from IWRAM!", sizeof("Hello from IWRAM!"));
-
-		fix16_t someint = fix16_from_int(10);
-		auto res = fix16_add(someint, fix16_from_int(1));
-
-		std::ostringstream address;
-		address << "HERES THE THING: " << (void const *)str << " " << fix16_to_int(res);
-		std::string name = address.str();
-		memcpy((char*)0x03000500, name.c_str(), strlen(name.c_str()));
-		free(str);
+        if(count % 10 == 0){
+            auto now = std::chrono::duration_cast<gba_milliseconds>(clock.now().time_since_epoch()).count();
+            printf("\033[17;0HTIME: %i%i     ", now.hi, now.lo);
+        }
         // Wait for VBlank to avoid screen tearing
+        count++;
         VBlankIntrWait();
     }
 

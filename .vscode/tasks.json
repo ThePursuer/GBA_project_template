@@ -1,67 +1,21 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-            "label": "Clean cmake",
-            "type": "shell",
-            "command": "rm",
-			"args": ["-r", "-f", "build/"],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-			"group": "build",
-            "problemMatcher": []
-		},
-		{
-			"type": "shell",
-			"label": "Run cmake",
-			"command": "cmake",
-			"args": [
-				".", "-B", "build"
-			],
-			"group": "build",
-			"problemMatcher": [],
-			"detail": "CMake build task",
-			"options": {
-				"cwd": "${workspaceFolder}"
-			},
-			"dependsOn": "Clean cmake"
-		},
-		{
-            "label": "Compile GBA Project",
-            "type": "shell",
-            "command": "make",
-            "options": {
-                "cwd": "${workspaceFolder}/build"
-            },
-			"group": "build",
-            "problemMatcher": [],
-			"dependsOn": "Clean GBA Project"
+    "tasks": [
+      {
+        "type": "cppbuild",
+        "label": "C/C++: g++ build active file",
+        "command": "C:/devkitPro/devkitARM/bin/arm-none-eabi-g++.exe",
+        "args": [
+          "-std=c++20",
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}"
         },
-		{
-            "label": "Compile GBA Project",
-            "type": "shell",
-            "command": "make",
-            "options": {
-                "cwd": "${workspaceFolder}/build"
-            },
-			"group": "build",
-            "problemMatcher": [],
-			"dependsOn": "Clean GBA Project"
-        },
-		{
-            "label": "Compile GBA Project: threaded",
-            "type": "shell",
-            "command": "make",
-			"args": [
-				"-j6"
-			],
-            "options": {
-                "cwd": "${workspaceFolder}/build"
-            },
-			"group": "build",
-            "dependsOn": ["cmake"],
-            "problemMatcher": []
+        "problemMatcher": ["$gcc"],
+        "group": {
+          "kind": "build",
+          "isDefault": true
         }
-	]
-}
+      }
+    ],
+    "version": "2.0.0"
+  }
