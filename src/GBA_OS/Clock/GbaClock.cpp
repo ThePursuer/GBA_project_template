@@ -1,17 +1,19 @@
 #include "GbaClock.h"
 
-u32 GbaClock::rollovers = 0;
+namespace gba_os {
+namespace chrono {
+
 
 GbaClock& GbaClock::instance() {
-    static GbaClock clock;
+    static IWRAM_DATA GbaClock clock;
     return clock;
 }
 
-std::chrono::time_point<GbaClock> GbaClock::now() noexcept {
+IWRAM_CODE std::chrono::time_point<GbaClock> GbaClock::now() noexcept {
     return time_point(duration(((REG_TM3CNT_L + rollovers * 0x10000) * 10) / 164));
 }
 
-void GbaClock::handle_interrupt() {
+EWRAM_CODE void GbaClock::handle_interrupt() {
     rollovers++;
 }
 
@@ -23,6 +25,10 @@ GbaClock::GbaClock() {
     irqEnable(IRQ_TIMER3);
 }
 
-void GbaClock::irq_handler() {
-    GbaClock::instance().handle_interrupt();
+EWRAM_CODE void GbaClock::irq_handler() {
+    static IWRAM_DATA GbaClock& clockref = GbaClock::instance();
+    clockref.handle_interrupt();
 }
+
+} // chrono
+} // gba_os

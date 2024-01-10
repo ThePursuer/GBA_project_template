@@ -64,7 +64,10 @@
         "optional": "cpp",
         "ios": "cpp",
         "iostream": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "semaphore": "cpp",
+        "condition_variable": "cpp",
+        "stop_token": "cpp"
     },
     "C_Cpp.default.cppStandard": "gnu++20",
     "C_Cpp.default.cStandard": "gnu17"

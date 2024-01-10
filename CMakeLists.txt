@@ -2,12 +2,13 @@
 cmake_minimum_required(VERSION 3.25)
 include(FetchContent)
 
-# Set the CMake toolchain file
-include($ENV{DEVKITPRO}/cmake/GBA.cmake)
-include($ENV{DEVKITPRO}/cmake/Platform/NintendoGBA.cmake)
-
 # Set the project name and version
 project(my_gba_project VERSION 1.0)
+
+set(CMAKE_CXX_STANDARD 20)
+
+# Set the CMake toolchain file
+include($ENV{DEVKITPRO}/cmake/GBA.cmake)
 
 FetchContent_Declare(
   libfixmath
@@ -26,7 +27,5 @@ target_compile_definitions(libfixmath PUBLIC
     # FIXMATH_NO_ROUNDING
     # FIXMATH_OPTIMIZE_8BIT
 )
-
-set(CMAKE_CXX_STANDARD 20)
 
 add_subdirectory(src)

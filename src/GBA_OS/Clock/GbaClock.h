@@ -7,6 +7,9 @@
 #include "gba_interrupt.h"
 //todo: Fix a bug where time_point + duration doesnst work 
 
+namespace gba_os {
+namespace chrono {
+
 // Equvalents of std::chrono::<resolution>, required because std::chrono uses 64bit integers and we don't have those. 
 typedef std::chrono::duration<u32, std::ratio<1, 1000000000>> gba_nanoseconds;
 typedef std::chrono::duration<u32, std::ratio<1, 1000000>> gba_microseconds;
@@ -28,11 +31,14 @@ public:
     void handle_interrupt();
 
 private:
-    static u32 rollovers;
+    u32 rollovers;
 
     GbaClock();
 
     static void irq_handler();
 };
+
+} // chrono
+} // gba_os
 
 #endif // GBA_CLOCK
