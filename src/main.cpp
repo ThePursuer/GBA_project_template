@@ -16,10 +16,10 @@
 #include <malloc.h>
 #include <stdio.h>
 
-#include "GBA_OS/Clock/GbaClock.h"
-#include "GBA_OS/Core.h"
-#include "GBA_OS/Tasks.h"
-#include "GBA_OS/Screen.h"
+#include <gba_os/Clock/GbaClock.h>
+#include <gba_os/Core.h>
+#include <gba_os/Tasks.h>
+#include <gba_os/Screen.h>
 
 #define PALETTE_SIZE 256
 
@@ -47,7 +47,7 @@ int main() {
 
     gba_os::init_gba_os();
 
-    gba_os::task mode4;
+    gba_os::Task mode4;
     mode4.f = &gba_os::builtin::update_screen_mode_4_task;
     mode4.data = (void*)&screen_buffer;
     mode4.priority = (gba_os::TASK_PRIORITY)0;
