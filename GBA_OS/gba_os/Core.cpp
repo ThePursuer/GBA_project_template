@@ -39,7 +39,7 @@ void set_framerate(video::FRAMERATE framerate){
     }
 }
 
-IWRAM_CODE ARM_CODE static void vblank_os_callback(){
+IWRAM_CODE static void vblank_os_callback(){
     switch(framerate_){
         case video::FRAMERATE60:
             break;
@@ -55,7 +55,7 @@ IWRAM_CODE ARM_CODE static void vblank_os_callback(){
         task.f(task);
 }
 
-IWRAM_CODE ARM_CODE void waitNextFrame(){
+IWRAM_CODE void waitNextFrame(){
     switch (framerate_)
     {
     case video::FRAMERATE60:
@@ -74,7 +74,7 @@ void init_gba_os(){
 	irqSet(IRQ_VBLANK, &vblank_os_callback);
 }
 
-IWRAM_CODE ARM_CODE void run_gba_os(){
+IWRAM_CODE void run_gba_os(){
     auto clock = chrono::GbaClock::instance();
     chrono::GbaClock::time_point start;
     chrono::gba_milliseconds delta;

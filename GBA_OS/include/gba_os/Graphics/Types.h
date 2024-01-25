@@ -11,7 +11,7 @@
 namespace gba_os::graphics {
 
 struct Vector2 {
-    float x, y;
+    fix16_t x, y;
 };
 
 struct Vector3 {

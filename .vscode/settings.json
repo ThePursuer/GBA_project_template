@@ -68,7 +68,12 @@
         "semaphore": "cpp",
         "condition_variable": "cpp",
         "stop_token": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "charconv": "cpp",
+        "format": "cpp",
+        "iomanip": "cpp",
+        "span": "cpp",
+        "variant": "cpp"
     },
     "C_Cpp.default.cppStandard": "gnu++20",
     "C_Cpp.default.cStandard": "gnu17"

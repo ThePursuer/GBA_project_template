@@ -15,7 +15,7 @@ FetchContent_Declare(
   libfixmath
   GIT_REPOSITORY https://github.com/PetteriAimonen/libfixmath
   GIT_TAG d308e466e1a09118d03f677c52e5fbf402f6fdd0
-  PATCH_COMMAND git apply /home/peter/GBA_project_template/patches/cache_test.patch
+  PATCH_COMMAND git apply ${PROJECT_SOURCE_DIR}/patches/cache_test.patch
 )
 FetchContent_MakeAvailable(libfixmath)
 
@@ -29,7 +29,7 @@ target_compile_definitions(libfixmath PUBLIC
     # FIXMATH_OPTIMIZE_8BIT
 )
 
-dkp_add_embedded_binary_library(meshes untitled.obj)
+dkp_add_embedded_binary_library(meshes cube.obj cube.mtl)
 
 add_subdirectory(GBA_OS)
 # add_subdirectory(ECS)

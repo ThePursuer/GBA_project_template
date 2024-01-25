@@ -23,7 +23,9 @@
 #include <gba_os/Graphics/Graphics.h>
 #include <gba_os/Console.h>
 
-#include "untitled_obj.h"
+#include "cube_obj.h"
+#include "cube_mtl.h"
+#include "gba_os/Graphics/Scene.h"
 
 #include <libfixmath/fixmath.h>
 
@@ -47,27 +49,81 @@ void fillPaletteBuffer(u16* paletteBuffer) {
     }
 }
 
-EWRAM_DATA uint8_t screen_buffer[160][240];
+void update_scene(gba_os::Task& t){
+    gba_os::graphics::Scene* scene = (gba_os::graphics::Scene*)t.data;
+    scene->update();
+}
+
+void buttons_task(gba_os::Task& t){
+    std::shared_ptr<gba_os::graphics::Camera>& camera = *(std::shared_ptr<gba_os::graphics::Camera>*)t.data;
+    // Get button input
+    u16 buttons = keysDown();
+
+    // Change camera rotation by 1 when a button is pressed
+    if (buttons & KEY_RIGHT) {
+        camera->rotation.z += F16(1);
+    }
+    if (buttons & KEY_B) {
+        camera->rotation.y += F16(1);
+    }
+    if (buttons & KEY_L) {
+        camera->rotation.x += F16(1);
+    }
+    if (buttons & KEY_LEFT) {
+        camera->rotation.z -= F16(1);
+    }
+}
 
 void run_mode_4_demo(){
     uint16_t * pallet = new uint16_t[256];
     fillPaletteBuffer(pallet);
+    // Create a scene object
+    gba_os::graphics::Scene scene;
 
     gba_os::init_gba_os();
 
     gba_os::Task mode4;
     mode4.f = &gba_os::tasks::update_screen_mode_4_task;
-    mode4.data = (void*)&screen_buffer;
+    mode4.data = (void*)scene.get_buffer_ptr();
     mode4.priority = (gba_os::TASK_PRIORITY)0;
     int mode4_task_id = gba_os::register_task(mode4);
 
+    gba_os::graphics::Mesh mesh;
+    gba_os::graphics::LoadOBJFile(cube_obj, cube_obj_size, mesh);
+    gba_os::graphics::Material material;
+    gba_os::graphics::LoadMTLFile256Colors(cube_mtl, cube_mtl_size, material);
+    gba_os::graphics::Vector3 position(1, 0, 0);
+    int id = 1;
+    
+    scene.register_entity(
+        std::make_shared<gba_os::graphics::Mesh>(mesh), 
+        std::make_shared<gba_os::graphics::Material>(material), 
+        std::make_shared<gba_os::graphics::Vector3>(position), 
+        id
+    );
+
+    std::shared_ptr<gba_os::graphics::Camera> camera = std::make_shared<gba_os::graphics::Camera>();
+    scene.register_camera(camera);
+    camera->pos = {F16(0), F16(0), F16(0)};
+    camera->rotation = {F16(0), F16(0), F16(0)};
+
+    gba_os::Task updateSceneTask;
+    updateSceneTask.f = &update_scene;
+    updateSceneTask.data = &scene;
+    updateSceneTask.priority = gba_os::TASK_PRIORITY::MEDIUM;
+    gba_os::register_task(updateSceneTask);
+
+    gba_os::Task buttons_task_;
+    buttons_task_.f = &buttons_task;
+    buttons_task_.data = &camera;
+    buttons_task_.priority = gba_os::TASK_PRIORITY::HIGH;
+    gba_os::register_task(buttons_task_);
+
     gba_os::graphics::set_palette_mode_4(pallet);
     gba_os::screen::set_mode4();
-    gba_os::set_framerate(gba_os::video::FRAMERATE60);
+    gba_os::set_framerate(gba_os::video::FRAMERATE30);
     
-    gba_os::run_gba_os();
-
-    
+    gba_os::run_gba_os();   
 }
 
 // Start the timer
@@ -113,24 +169,10 @@ EWRAM_CODE void run_console_test(){
 
     // Set up the video mode and enable sprites
     SetMode(MODE_0 | BG0_ON | OBJ_ENABLE | OBJ_1D_MAP);
-
-    clearConsole();
-    gba_os::graphics::Mesh m;
-    startTimer();
-    gba_os::graphics::LoadOBJFile(untitled_obj, untitled_obj_size, m);
-    auto delta = stopTimer();
-
-    for(int i = 0; i < m.vertices.size(); i++){
-        moveCursor(i,0);
-        printf("Verticies: %i %i %i", fix16_to_int(m.vertices[i].x), fix16_to_int(m.vertices[i].y), fix16_to_int(m.vertices[i].z));
-    }
-    moveCursor(m.vertices.size(), 0);
-    printf("Time to load: %i", delta);
-    while(1){VBlankIntrWait();};
 }
 
 int main() {
-    run_console_test();
+    run_mode_4_demo();
 
     return 0;
 }
