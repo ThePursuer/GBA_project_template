@@ -1,0 +1,328 @@
+diff --git a/libfixmath/fix16.c b/libfixmath/fix16.c
+index 71f5e0b..286c68b 100644
+--- a/libfixmath/fix16.c
++++ b/libfixmath/fix16.c
+@@ -6,7 +6,7 @@
+  * The versions without overflow detection are inlined in the header.
+  */
+ #ifndef FIXMATH_NO_OVERFLOW
+-fix16_t fix16_add(fix16_t a, fix16_t b)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_add(fix16_t a, fix16_t b)
+ {
+ 	// Use unsigned integers because overflow with signed integers is
+ 	// an undefined operation (http://www.airs.com/blog/archives/120).
+@@ -22,7 +22,7 @@ fix16_t fix16_add(fix16_t a, fix16_t b)
+ 	return sum;
+ }
+ 
+-fix16_t fix16_sub(fix16_t a, fix16_t b)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_sub(fix16_t a, fix16_t b)
+ {
+     uint32_t _a = a;
+     uint32_t _b = b;
+@@ -37,7 +37,7 @@ fix16_t fix16_sub(fix16_t a, fix16_t b)
+ }
+ 
+ /* Saturating arithmetic */
+-fix16_t fix16_sadd(fix16_t a, fix16_t b)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_sadd(fix16_t a, fix16_t b)
+ {
+ 	fix16_t result = fix16_add(a, b);
+ 
+@@ -47,7 +47,7 @@ fix16_t fix16_sadd(fix16_t a, fix16_t b)
+ 	return result;
+ }	
+ 
+-fix16_t fix16_ssub(fix16_t a, fix16_t b)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_ssub(fix16_t a, fix16_t b)
+ {
+ 	fix16_t result = fix16_sub(a, b);
+ 
+@@ -112,7 +112,7 @@ fix16_t fix16_mul(fix16_t inArg0, fix16_t inArg1)
+  * uint64_t. Uses 16*16->32bit multiplications.
+  */
+ #if defined(FIXMATH_NO_64BIT) && !defined(FIXMATH_OPTIMIZE_8BIT)
+-fix16_t fix16_mul(fix16_t inArg0, fix16_t inArg1)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_mul(fix16_t inArg0, fix16_t inArg1)
+ {
+ 	// Each argument is divided to 16-bit parts.
+ 	//					AB
+@@ -254,7 +254,7 @@ fix16_t fix16_mul(fix16_t inArg0, fix16_t inArg1)
+ 
+ #ifndef FIXMATH_NO_OVERFLOW
+ /* Wrapper around fix16_mul to add saturating arithmetic. */
+-fix16_t fix16_smul(fix16_t inArg0, fix16_t inArg1)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_smul(fix16_t inArg0, fix16_t inArg1)
+ {
+ 	fix16_t result = fix16_mul(inArg0, inArg1);
+ 	
+@@ -368,7 +368,7 @@ fix16_t fix16_div(fix16_t a, fix16_t b)
+  * do not have hardware division.
+  */
+ #if defined(FIXMATH_NO_HARD_DIVISION)
+-fix16_t fix16_div(fix16_t a, fix16_t b)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_div(fix16_t a, fix16_t b)
+ {
+ 	// This uses the basic binary restoring division algorithm.
+ 	// It appears to be faster to do the whole division manually than
+@@ -464,7 +464,7 @@ fix16_t fix16_sdiv(fix16_t inArg0, fix16_t inArg1)
+ }
+ #endif
+ 
+-fix16_t fix16_mod(fix16_t x, fix16_t y)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_mod(fix16_t x, fix16_t y)
+ {
+ 	#ifdef FIXMATH_NO_HARD_DIVISION
+ 		/* The reason we do this, rather than use a modulo operator
+diff --git a/libfixmath/fix16_exp.c b/libfixmath/fix16_exp.c
+index ec84233..382b1d2 100644
+--- a/libfixmath/fix16_exp.c
++++ b/libfixmath/fix16_exp.c
+@@ -14,7 +14,7 @@ static fix16_t _fix16_exp_cache_value[4096]  = { 0 };
+ 
+ 
+ 
+-fix16_t fix16_exp(fix16_t inValue) {
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_exp(fix16_t inValue) {
+ 	if(inValue == 0        ) return fix16_one;
+ 	if(inValue == fix16_one) return fix16_e;
+ 	if(inValue >= 681391   ) return fix16_maximum;
+@@ -63,7 +63,7 @@ fix16_t fix16_exp(fix16_t inValue) {
+ 
+ 
+ 
+-fix16_t fix16_log(fix16_t inValue)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_log(fix16_t inValue)
+ {
+ 	fix16_t guess = fix16_from_int(2);
+ 	fix16_t delta;
+@@ -108,7 +108,7 @@ fix16_t fix16_log(fix16_t inValue)
+ 
+ 
+ 
+-static inline fix16_t fix16_rs(fix16_t x)
++__attribute__((section(".iwram"), long_call)) static inline fix16_t fix16_rs(fix16_t x)
+ {
+ 	#ifdef FIXMATH_NO_ROUNDING
+ 		return (x >> 1);
+@@ -124,7 +124,7 @@ static inline fix16_t fix16_rs(fix16_t x)
+  * Note that this is only ever called with inValue >= 1 (because it has a wrapper to check. 
+  * As such, the result is always less than the input. 
+  */
+-static fix16_t fix16__log2_inner(fix16_t x)
++__attribute__((section(".iwram"), long_call)) static fix16_t fix16__log2_inner(fix16_t x)
+ {
+ 	fix16_t result = 0;
+ 	
+@@ -167,7 +167,7 @@ static fix16_t fix16__log2_inner(fix16_t x)
+  * 
+  * This can be used as a helper function to calculate powers with non-integer powers and/or bases.
+  */
+-fix16_t fix16_log2(fix16_t x)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_log2(fix16_t x)
+ {
+ 	// Note that a negative x gives a non-real result.
+ 	// If x == 0, the limit of log2(x)  as x -> 0 = -infinity.
+@@ -193,7 +193,7 @@ fix16_t fix16_log2(fix16_t x)
+ /**
+  * This is a wrapper for fix16_log2 which implements saturation arithmetic.
+  */
+-fix16_t fix16_slog2(fix16_t x)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_slog2(fix16_t x)
+ {
+ 	fix16_t retval = fix16_log2(x);
+ 	// The only overflow possible is when the input is negative.
+diff --git a/libfixmath/fix16_sqrt.c b/libfixmath/fix16_sqrt.c
+index 78984d4..246d023 100644
+--- a/libfixmath/fix16_sqrt.c
++++ b/libfixmath/fix16_sqrt.c
+@@ -9,7 +9,7 @@
+  * Not sure if someone relies on this behaviour, but not going
+  * to break it for now. It doesn't slow the code much overall.
+  */
+-fix16_t fix16_sqrt(fix16_t inValue)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_sqrt(fix16_t inValue)
+ {
+     uint8_t neg     = (inValue < 0);
+     uint32_t num    = fix_abs(inValue);
+diff --git a/libfixmath/fix16_str.c b/libfixmath/fix16_str.c
+index 5defa7c..8fc150a 100644
+--- a/libfixmath/fix16_str.c
++++ b/libfixmath/fix16_str.c
+@@ -41,7 +41,7 @@ static char *itoa_loop(char *buf, uint32_t scale, uint32_t value, bool skip)
+     return buf;
+ }
+ 
+-void fix16_to_str(fix16_t value, char *buf, int decimals)
++__attribute__((section(".iwram"), long_call)) void fix16_to_str(fix16_t value, char *buf, int decimals)
+ {
+     uint32_t uvalue = (value >= 0) ? value : -value;
+     if (value < 0)
+@@ -73,7 +73,7 @@ void fix16_to_str(fix16_t value, char *buf, int decimals)
+     *buf = '\0';
+ }
+ 
+-fix16_t fix16_from_str(const char *buf)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_from_str(const char *buf)
+ {
+     while (isspace((unsigned char) *buf))
+         buf++;
+diff --git a/libfixmath/fix16_trig.c b/libfixmath/fix16_trig.c
+index 7f75f7a..c1c6577 100644
+--- a/libfixmath/fix16_trig.c
++++ b/libfixmath/fix16_trig.c
+@@ -20,7 +20,7 @@ static fix16_t _fix16_atan_cache_value[4096] = { 0 };
+ #endif
+ 
+ 
+-fix16_t fix16_sin_parabola(fix16_t inAngle)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_sin_parabola(fix16_t inAngle)
+ {
+ 	fix16_t abs_inAngle, retval;
+ 	fix16_t mask;
+@@ -53,7 +53,7 @@ fix16_t fix16_sin_parabola(fix16_t inAngle)
+ 	return retval;
+ }
+ 
+-fix16_t fix16_sin(fix16_t inAngle)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_sin(fix16_t inAngle)
+ {
+ 	fix16_t tempAngle = inAngle % (fix16_pi << 1);
+ 
+@@ -115,12 +115,12 @@ fix16_t fix16_sin(fix16_t inAngle)
+ 	return tempOut;
+ }
+ 
+-fix16_t fix16_cos(fix16_t inAngle)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_cos(fix16_t inAngle)
+ {
+ 	return fix16_sin(inAngle + (fix16_pi >> 1));
+ }
+ 
+-fix16_t fix16_tan(fix16_t inAngle)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_tan(fix16_t inAngle)
+ {
+ 	#ifndef FIXMATH_NO_OVERFLOW
+ 	return fix16_sdiv(fix16_sin(inAngle), fix16_cos(inAngle));
+@@ -129,7 +129,7 @@ fix16_t fix16_tan(fix16_t inAngle)
+ 	#endif
+ }
+ 
+-fix16_t fix16_asin(fix16_t x)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_asin(fix16_t x)
+ {
+ 	if((x > fix16_one)
+ 		|| (x < -fix16_one))
+@@ -142,12 +142,12 @@ fix16_t fix16_asin(fix16_t x)
+ 	return out;
+ }
+ 
+-fix16_t fix16_acos(fix16_t x)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_acos(fix16_t x)
+ {
+ 	return ((fix16_pi >> 1) - fix16_asin(x));
+ }
+ 
+-fix16_t fix16_atan2(fix16_t inY , fix16_t inX)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_atan2(fix16_t inY , fix16_t inX)
+ {
+ 	fix16_t abs_inY, mask, angle, r, r_3;
+ 
+@@ -189,7 +189,7 @@ fix16_t fix16_atan2(fix16_t inY , fix16_t inX)
+ 	return angle;
+ }
+ 
+-fix16_t fix16_atan(fix16_t x)
++__attribute__((section(".iwram"), long_call)) fix16_t fix16_atan(fix16_t x)
+ {
+ 	return fix16_atan2(x, fix16_one);
+ }
+diff --git a/libfixmath/int64.h b/libfixmath/int64.h
+index 40f8294..70e6fc9 100644
+--- a/libfixmath/int64.h
++++ b/libfixmath/int64.h
+@@ -53,7 +53,7 @@ static inline int int64_cmp_ge(_int64_t x, _int64_t y) { return ((x.hi > y.hi) |
+ static inline int int64_cmp_lt(_int64_t x, _int64_t y) { return ((x.hi < y.hi) || ((x.hi == y.hi) && (x.lo <  y.lo))); }
+ static inline int int64_cmp_le(_int64_t x, _int64_t y) { return ((x.hi < y.hi) || ((x.hi == y.hi) && (x.lo <= y.lo))); }
+ 
+-static inline _int64_t int64_add(_int64_t x, _int64_t y) {
++__attribute__((section(".iwram"), long_call)) static inline _int64_t int64_add(_int64_t x, _int64_t y) {
+ 	_int64_t ret;
+ 	ret.hi = x.hi + y.hi;
+ 	ret.lo = x.lo + y.lo;
+@@ -62,7 +62,7 @@ static inline _int64_t int64_add(_int64_t x, _int64_t y) {
+ 	return ret;
+ }
+ 
+-static inline _int64_t int64_neg(_int64_t x) {
++__attribute__((section(".iwram"), long_call)) static inline _int64_t int64_neg(_int64_t x) {
+ 	_int64_t ret;
+ 	ret.hi = ~x.hi;
+ 	ret.lo = ~x.lo + 1;
+@@ -71,11 +71,11 @@ static inline _int64_t int64_neg(_int64_t x) {
+ 	return ret;
+ }
+ 
+-static inline _int64_t int64_sub(_int64_t x, _int64_t y) {
++__attribute__((section(".iwram"), long_call)) static inline _int64_t int64_sub(_int64_t x, _int64_t y) {
+ 	return int64_add(x, int64_neg(y));
+ }
+ 
+-static inline _int64_t int64_shift(_int64_t x, int8_t y) {
++__attribute__((section(".iwram"), long_call)) static inline _int64_t int64_shift(_int64_t x, int8_t y) {
+ 	_int64_t ret = {0,0};
+ 	if(y >= 64 || y <= -64)
+ 		return (_int64_t){ 0, 0 };
+@@ -99,7 +99,7 @@ static inline _int64_t int64_shift(_int64_t x, int8_t y) {
+ 	return ret;
+ }
+ 
+-static inline _int64_t int64_mul_i32_i32(int32_t x, int32_t y) {
++__attribute__((section(".iwram"), long_call)) static inline _int64_t int64_mul_i32_i32(int32_t x, int32_t y) {
+ 	 int16_t hi[2] = { (x >> 16), (y >> 16) };
+ 	uint16_t lo[2] = { (x & 0xFFFF), (y & 0xFFFF) };
+ 
+@@ -113,7 +113,7 @@ static inline _int64_t int64_mul_i32_i32(int32_t x, int32_t y) {
+ 	return int64_add(r_hilo64, r_md64);
+ }
+ 
+-static inline _int64_t int64_mul_i64_i32(_int64_t x, int32_t y) {
++__attribute__((section(".iwram"), long_call)) static inline _int64_t int64_mul_i64_i32(_int64_t x, int32_t y) {
+ 	int neg = ((x.hi ^ y) < 0);
+ 	if(x.hi < 0)
+ 		x = int64_neg(x);
+@@ -141,7 +141,7 @@ static inline _int64_t int64_mul_i64_i32(_int64_t x, int32_t y) {
+ 	return (neg ? int64_neg(ret) : ret);
+ }
+ 
+-static inline _int64_t int64_div_i64_i32(_int64_t x, int32_t y) {
++__attribute__((section(".iwram"), long_call)) static inline _int64_t int64_div_i64_i32(_int64_t x, int32_t y) {
+ 	int neg = ((x.hi ^ y) < 0);
+ 	if(x.hi < 0)
+ 		x = int64_neg(x);
+diff --git a/libfixmath/libfixmath.cmake b/libfixmath/libfixmath.cmake
+index 138b1de..90d3ef4 100644
+--- a/libfixmath/libfixmath.cmake
++++ b/libfixmath/libfixmath.cmake
+@@ -3,4 +3,5 @@ file(GLOB libfixmath-srcs libfixmath/*.c)
+ add_library(libfixmath STATIC ${libfixmath-srcs})
+ 
+ target_include_directories(libfixmath INTERFACE
+-  ${CMAKE_CURRENT_SOURCE_DIR})
+\ No newline at end of file
++  ${CMAKE_CURRENT_SOURCE_DIR})
++  dkp_target_generate_symbol_list(libfixmath)
+\ No newline at end of file
+diff --git a/libfixmath/uint32.c b/libfixmath/uint32.c
+index 4d7751b..d6f3f7f 100644
+--- a/libfixmath/uint32.c
++++ b/libfixmath/uint32.c
+@@ -2,7 +2,7 @@
+ 
+ 
+ 
+-uint32_t uint32_log2(uint32_t inVal) {
++__attribute__((section(".iwram"), long_call)) uint32_t uint32_log2(uint32_t inVal) {
+ 	if(inVal == 0)
+ 		return 0;
+ 	uint32_t tempOut = 0;

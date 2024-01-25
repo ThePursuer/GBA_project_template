@@ -15,17 +15,21 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <stdio.h>
+#include <cmath>
 
 #include <gba_os/Clock/GbaClock.h>
 #include <gba_os/Core.h>
-#include <gba_os/Tasks.h>
 #include <gba_os/Screen.h>
+#include <gba_os/Graphics/Graphics.h>
+#include <gba_os/Console.h>
 
 #include "untitled_obj.h"
 
 #include <libfixmath/fixmath.h>
 
 #define PALETTE_SIZE 256
+
+using namespace gba_os::console;
 
 // Function to create a 16-bit color from red, green, and blue components
 u16 createColor(u8 red, u8 green, u8 blue) {
@@ -57,14 +61,14 @@ void run_mode_4_demo(){
     mode4.priority = (gba_os::TASK_PRIORITY)0;
     int mode4_task_id = gba_os::register_task(mode4);
 
-    gba_os::screen::set_palette_mode_4(pallet);
+    gba_os::graphics::set_palette_mode_4(pallet);
     gba_os::screen::set_mode4();
     gba_os::set_framerate(gba_os::video::FRAMERATE60);
     
     gba_os::run_gba_os();
-}
 
-#include <gba.h>
+    
+}
 
 // Start the timer
 void startTimer() {
@@ -90,28 +94,7 @@ void resetTimer() {
     REG_TM0CNT_L = 0; // Reset timer value
 }
 
-// Function to clear the console
-void clearConsole() {
-    printf("\x1b[2J"); // Clear the screen
-    printf("\x1b[H");  // Move the cursor to the top-left corner
-}
-
-// Function to move the cursor to a specific line and column
-void moveCursor(int line, int column) {
-    printf("\x1b[%d;%dH", line, column);
-}
-
-
-__attribute__((optimize(0))) fix16_t divide(fix16_t a, fix16_t b){
-    return fix16_div(a, b);
-}
-
-__attribute__((optimize(0))) float dividef(float a, float b){
-    return a / b;
-}
-
-
-void run_console_test(){
+EWRAM_CODE void run_console_test(){
     // initialise the console
 	// setting NULL & 0 for the font address & size uses the default font
 	// The font should be a complete 1bit 8x8 ASCII font
@@ -131,30 +114,18 @@ void run_console_test(){
     // Set up the video mode and enable sprites
     SetMode(MODE_0 | BG0_ON | OBJ_ENABLE | OBJ_1D_MAP);
 
-    volatile float numf = 33;
-    volatile float denomf = 16;
-
-    volatile fix16_t numerator = fix16_from_int(33);
-    volatile fix16_t denominator = fix16_from_int(16);
-
     clearConsole();
-
-    // Test libfixmath and print result
+    gba_os::graphics::Mesh m;
     startTimer();
-    auto res = divide(numerator, denominator);
+    gba_os::graphics::LoadOBJFile(untitled_obj, untitled_obj_size, m);
     auto delta = stopTimer();
-    printf("FMelapsed: %i, result: %i", delta, res);
-    moveCursor(2,0);
-    resetTimer();
 
-    
-    // test reg registers and result
-    startTimer();
-    auto resf = dividef(numf, denomf);
-    delta = stopTimer();
-    printf("FOPelapsed: %i, result: %f", delta, resf);
-    resetTimer();
-
+    for(int i = 0; i < m.vertices.size(); i++){
+        moveCursor(i,0);
+        printf("Verticies: %i %i %i", fix16_to_int(m.vertices[i].x), fix16_to_int(m.vertices[i].y), fix16_to_int(m.vertices[i].z));
+    }
+    moveCursor(m.vertices.size(), 0);
+    printf("Time to load: %i", delta);
     while(1){VBlankIntrWait();};
 }
 

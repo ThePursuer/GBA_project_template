@@ -9,14 +9,18 @@ set(CMAKE_CXX_STANDARD 20)
 include($ENV{DEVKITPRO}/cmake/GBA.cmake)
 
 set(GBA_OS_SRC
+    gba_os/Graphics/Graphics.cpp
+
+    gba_os/Console.cpp
     gba_os/Core.cpp
-    gba_os/Screen.cpp
-    gba_os/Tasks.cpp
     gba_os/GbaClock.cpp
+    gba_os/OsErrors.cpp
+    gba_os/Screen.cpp
 )
 
 set(GBA_OS_LINK_LIBS
     gba
+    libfixmath
 )
 
 option(BUILD_WITH_MAXMOD "Build the library with Maxmod support" ON)
@@ -29,6 +33,7 @@ add_library( gba_os STATIC ${GBA_OS_SRC})
 
 target_link_libraries(gba_os PUBLIC ${GBA_OS_LINK_LIBS})
 target_compile_options(gba_os PRIVATE -Wno-volatile)
+dkp_target_generate_symbol_list(gba_os)
 
 target_include_directories(gba_os PUBLIC
 $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

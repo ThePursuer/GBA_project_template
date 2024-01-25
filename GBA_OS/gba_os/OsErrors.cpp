@@ -2,6 +2,17 @@
 
 namespace gba_os::error {
 
+using namespace gba_os::console;
+
+void frame_duration_exceeded(void* data){
+	gba_os::chrono::gba_milliseconds* delta = static_cast<chrono::gba_milliseconds*>(data);
+    printf("Frame time exceeded: %i", delta->count());
+}
+
+void invalid_pallet(void* data){
+	printf("Pallet invalid: %p", data);
+}
+
 void error_state(os_error err, void* data){
     // initialise the console
 	// setting NULL & 0 for the font address & size uses the default font
@@ -21,8 +32,21 @@ void error_state(os_error err, void* data){
 
     // Set up the video mode and enable sprites
     SetMode(MODE_0 | BG0_ON | OBJ_ENABLE | OBJ_1D_MAP);
+	clearConsole();
     
-    printf("\033[16;10ERROR: %i", err);
+    printf("ERROR: %i", err);
+	moveCursor(1, 0);
+
+	switch (err)
+	{
+	case os_error::FRAME_DURATION_EXCEEDED:
+		frame_duration_exceeded(data);
+		break;
+	case os_error::INVALID_PALLET:
+		break;
+	default:
+		break;
+	}
     while(1);
 }
 

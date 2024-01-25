@@ -5,6 +5,4 @@ CMakeCache.txt
 *.bin
 Makefile
 install_manifest.txt
-lib
-include
 .dkp-generated
