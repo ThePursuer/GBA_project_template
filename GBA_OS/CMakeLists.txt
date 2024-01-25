@@ -16,6 +16,8 @@ set(GBA_OS_SRC
     gba_os/GbaClock.cpp
     gba_os/OsErrors.cpp
     gba_os/Screen.cpp
+
+    gba_os/UnitTests.cpp
 )
 
 set(GBA_OS_LINK_LIBS

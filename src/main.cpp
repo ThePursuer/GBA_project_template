@@ -22,10 +22,10 @@
 #include <gba_os/Screen.h>
 #include <gba_os/Graphics/Graphics.h>
 #include <gba_os/Console.h>
+#include <gba_os/UnitTest.h>
 
 #include "cube_obj.h"
 #include "cube_mtl.h"
-#include "gba_os/Graphics/Scene.h"
 
 #include <libfixmath/fixmath.h>
 
@@ -47,11 +47,6 @@ void fillPaletteBuffer(u16* paletteBuffer) {
 
         paletteBuffer[i] = createColor(red, green, blue);
     }
-}
-
-void update_scene(gba_os::Task& t){
-    gba_os::graphics::Scene* scene = (gba_os::graphics::Scene*)t.data;
-    scene->update();
 }
 
 void buttons_task(gba_os::Task& t){
@@ -77,14 +72,12 @@ void buttons_task(gba_os::Task& t){
 void run_mode_4_demo(){
     uint16_t * pallet = new uint16_t[256];
     fillPaletteBuffer(pallet);
-    // Create a scene object
-    gba_os::graphics::Scene scene;
 
     gba_os::init_gba_os();
 
     gba_os::Task mode4;
     mode4.f = &gba_os::tasks::update_screen_mode_4_task;
-    mode4.data = (void*)scene.get_buffer_ptr();
+    mode4.data = NULL; // the buffer for the screen needs to be assigned here
     mode4.priority = (gba_os::TASK_PRIORITY)0;
     int mode4_task_id = gba_os::register_task(mode4);
 
@@ -94,24 +87,10 @@ void run_mode_4_demo(){
     gba_os::graphics::LoadMTLFile256Colors(cube_mtl, cube_mtl_size, material);
     gba_os::graphics::Vector3 position(1, 0, 0);
     int id = 1;
-    
-    scene.register_entity(
-        std::make_shared<gba_os::graphics::Mesh>(mesh), 
-        std::make_shared<gba_os::graphics::Material>(material), 
-        std::make_shared<gba_os::graphics::Vector3>(position), 
-        id
-    );
 
     std::shared_ptr<gba_os::graphics::Camera> camera = std::make_shared<gba_os::graphics::Camera>();
-    scene.register_camera(camera);
     camera->pos = {F16(0), F16(0), F16(0)};
     camera->rotation = {F16(0), F16(0), F16(0)};
-
-    gba_os::Task updateSceneTask;
-    updateSceneTask.f = &update_scene;
-    updateSceneTask.data = &scene;
-    updateSceneTask.priority = gba_os::TASK_PRIORITY::MEDIUM;
-    gba_os::register_task(updateSceneTask);
 
     gba_os::Task buttons_task_;
     buttons_task_.f = &buttons_task;
@@ -151,28 +130,39 @@ void resetTimer() {
 }
 
 EWRAM_CODE void run_console_test(){
-    // initialise the console
-	// setting NULL & 0 for the font address & size uses the default font
-	// The font should be a complete 1bit 8x8 ASCII font
-	consoleInit(	0,		// charbase
-					4,		// mapbase
-					0,		// background number
-					NULL,	// font
-					0, 		// font size
-					15		// 16 color palette
-	);
+    gba_os::init_gba_os();
+    gba_os::console::initialize_console();
+    
+    // Example tests
+    gba_os::test::RegisterTest("Test 1", []() {
+        return (1 + 1) == 2;
+    });
 
-	// set the screen colors, color 0 is the background color
-	// the foreground color is index 1 of the selected 16 color palette
-	BG_COLORS[0]=RGB8(58,110,165);
-	BG_COLORS[241]=RGB5(31,31,31);
+    gba_os::test::RegisterTest("Test 2", []() {
+        return (3 * 4) == 12;
+    });
 
-    // Set up the video mode and enable sprites
-    SetMode(MODE_0 | BG0_ON | OBJ_ENABLE | OBJ_1D_MAP);
+    gba_os::test::RegisterTest("Test 3", []() {
+        return (5 - 2) == 3;
+    });
+
+    // Run all registered tests
+    gba_os::test::RunTests();
+
+    // Display the results
+    gba_os::set_framerate(gba_os::video::FRAMERATE30);
+
+    gba_os::Task test_results_task_;
+    test_results_task_.f = &gba_os::test::test_results_task;
+    test_results_task_.data = NULL;
+    test_results_task_.priority = gba_os::TASK_PRIORITY::HIGH;
+    gba_os::register_task(test_results_task_);
+
+    gba_os::run_gba_os();
 }
 
 int main() {
-    run_mode_4_demo();
+    run_console_test();
 
     return 0;
 }

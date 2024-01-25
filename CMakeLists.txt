@@ -15,14 +15,14 @@ FetchContent_Declare(
   libfixmath
   GIT_REPOSITORY https://github.com/PetteriAimonen/libfixmath
   GIT_TAG d308e466e1a09118d03f677c52e5fbf402f6fdd0
-  PATCH_COMMAND git apply ${PROJECT_SOURCE_DIR}/patches/cache_test.patch
+  PATCH_COMMAND git apply ${PROJECT_SOURCE_DIR}/patches/libfixmath.patch
 )
 FetchContent_MakeAvailable(libfixmath)
 
 target_compile_definitions(libfixmath PUBLIC
     FIXMATH_FAST_SIN
     FIXMATH_NO_64BIT
-    # FIXMATH_NO_CACHE
+    FIXMATH_NO_CACHE
     FIXMATH_NO_HARD_DIVISION
     # FIXMATH_NO_OVERFLOW
     # FIXMATH_NO_ROUNDING
