@@ -13,6 +13,7 @@
 #include <gba_os/CoreDefs.h>
 
 namespace gba_os::test {
+
 // Struct to represent a single test case
 struct TestCase {
     std::string name;

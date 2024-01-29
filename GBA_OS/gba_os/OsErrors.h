@@ -12,7 +12,8 @@ namespace gba_os::error {
 
 enum os_error {
     FRAME_DURATION_EXCEEDED,
-    INVALID_PALLET
+    INVALID_PALLET,
+    SFOTWARE_RUNTIME_ERROR
 };
 
 void error_state(os_error err, void* data);

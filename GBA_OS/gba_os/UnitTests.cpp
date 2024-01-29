@@ -21,14 +21,14 @@ void RunTests() {
     int totalCount = testCases.size();
 
     for (const TestCase& testCase : testCases) {
-        testBuffer << "Running test: " << testCase.name << "... ";
+        testBuffer << testCase.name;
 
         bool result = testCase.testFunc();
         if (result) {
-            testBuffer << "PASSED\n";
+            testBuffer << "[PASS]\n";
             passedCount++;
         } else {
-            testBuffer << "FAILED\n";
+            testBuffer << "[FAIL]\n";
         }
     }
 

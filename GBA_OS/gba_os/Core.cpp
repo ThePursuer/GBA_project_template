@@ -13,6 +13,12 @@ IWRAM_DATA static std::vector<Task> vblank_tasks_ = {};
 IWRAM_DATA static std::unordered_set<uint16_t> vblank_task_ids;
 IWRAM_DATA static chrono::gba_milliseconds frame_duration = chrono::gba_milliseconds(1000 / 60);
 
+
+void raise_software_error(std::string error){
+    // error will not be modified so const cast is safe here
+    gba_os::error::error_state(gba_os::error::os_error::SFOTWARE_RUNTIME_ERROR, &error);
+}
+
 static constexpr void sort_tasks(std::vector<Task>& t_){
     std::sort(
         t_.begin(),

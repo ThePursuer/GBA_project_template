@@ -13,6 +13,12 @@ void invalid_pallet(void* data){
 	printf("Pallet invalid: %p", data);
 }
 
+void software_runtime_error(void* data){
+	std::string& str = *static_cast<std::string*>(data);
+	printf("Software runtime error:\n");
+	printf("%s", str.c_str());
+}
+
 void error_state(os_error err, void* data){
     // initialise the console
 	// setting NULL & 0 for the font address & size uses the default font
@@ -43,6 +49,10 @@ void error_state(os_error err, void* data){
 		frame_duration_exceeded(data);
 		break;
 	case os_error::INVALID_PALLET:
+		invalid_pallet(data);
+		break;
+	case os_error::SFOTWARE_RUNTIME_ERROR:
+		software_runtime_error(data);
 		break;
 	default:
 		break;

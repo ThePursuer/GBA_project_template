@@ -9,20 +9,15 @@ set(CMAKE_CXX_STANDARD 20)
 include($ENV{DEVKITPRO}/cmake/GBA.cmake)
 
 set(GBA_OS_SRC
-    gba_os/Graphics/Graphics.cpp
-
     gba_os/Console.cpp
     gba_os/Core.cpp
     gba_os/GbaClock.cpp
     gba_os/OsErrors.cpp
     gba_os/Screen.cpp
-
-    gba_os/UnitTests.cpp
 )
 
 set(GBA_OS_LINK_LIBS
     gba
-    libfixmath
 )
 
 option(BUILD_WITH_MAXMOD "Build the library with Maxmod support" ON)
@@ -31,15 +26,20 @@ if(BUILD_WITH_MAXMOD)
     set(GBA_OS_LINK_LIBS ${GBA_OS_LINK_LIBS} mm)
 endif()
 
-add_library( gba_os STATIC ${GBA_OS_SRC})
+option(WITH_UNIT_TESTS "Build gba_os/UnitTests.cpp" OFF)
+if(WITH_UNIT_TESTS)
+    set(GBA_OS_SRC ${GBA_OS_SRC} gba_os/UnitTests.cpp)
+endif()
+
+add_library(gba_os STATIC ${GBA_OS_SRC})
 
 target_link_libraries(gba_os PUBLIC ${GBA_OS_LINK_LIBS})
 target_compile_options(gba_os PRIVATE -Wno-volatile)
 dkp_target_generate_symbol_list(gba_os)
 
 target_include_directories(gba_os PUBLIC
-$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-$<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
 )
 
 install(TARGETS gba_os
