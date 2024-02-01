@@ -45,13 +45,22 @@ inline std::string matrix_to_string(const Matrix& matrix)
     return ss.str();
 }
 
-Matrix& get_matrix_ptr();
-
-void matrixPop();
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// Function declarations
+void matrixLerp_c(const Matrix &n, Matrix &m, int32_t pmul, int32_t pdiv);
+void matrixSetIdentity_c(Matrix &m);
+void matrixSetBasis_c(Matrix &dst, const Matrix &src);
+void matrixTranslateRel_c(Matrix &m, int32_t x, int32_t y, int32_t z);
+void matrixTranslateAbs_c(Matrix &m, int32_t x, int32_t y, int32_t z);
+void matrixTranslateSet_c(Matrix &m, int32_t x, int32_t y, int32_t z);
+void matrixRotateX_c(Matrix &m, int32_t angle);
+void matrixRotateY_c(Matrix &m, int32_t angle);
+void matrixRotateZ_c(Matrix &m, int32_t angle);
+void matrixRotateYQ_c(Matrix &m, int32_t quadrant);
+void matrixRotateYXZ_c(Matrix &m, int32_t angleX, int32_t angleY, int32_t angleZ);
 
 #define ENCODE_ANGLES(x, y, z) \
     (((x >> 2) & 0x3FF0) << 16) | (((y >> 12) & 0x000F) << 16) | (((y << 4) & 0xFC00) | ((z >> 6) & 0x03FF))

@@ -6,6 +6,7 @@
 #define DIV_TABLE_SIZE   1025 // to compare with #1024 without extra LDR
 extern uint16_t divTable[DIV_TABLE_SIZE];
 extern const uint32_t gSinCosTable[4096];
+#define FIXED_SHIFT     14
 
 
 #ifdef __cplusplus

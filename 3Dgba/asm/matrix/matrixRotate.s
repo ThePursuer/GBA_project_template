@@ -26,13 +26,14 @@
 .endm
 
 angle   .req r0     // arg
-mat     .req r1     // arg
-s       .req r2
-c       .req r3
-v       .req r4
+s       .req r1
+c       .req r2
+v       .req r3
+mat     .req r4
 // FIQ regs
 e0      .req r8
 e1      .req r9
+m       .req angle
 
 .global matrixRotateX_asm
 matrixRotateX_asm:
@@ -43,20 +44,22 @@ matrixRotateX_asm:
 
     sincos angle, s, c
 
-    add mat, mat, #4    // skip first column
-    ldmia mat, {e0, e1}
-    rotxy e1, e0, s, c, v
-    stmia mat, {e0, e1}
+    mov m, r1
 
-    add mat, #(4 * 4)
-    ldmia mat, {e0, e1}
+    add m, m, #4    // skip first column
+    ldmia m, {e0, e1}
     rotxy e1, e0, s, c, v
-    stmia mat, {e0, e1}
+    stmia m, {e0, e1}
 
-    add mat, #(4 * 4)
-    ldmia mat, {e0, e1}
+    add m, #(4 * 4)
+    ldmia m, {e0, e1}
     rotxy e1, e0, s, c, v
-    stmia mat, {e0, e1}
+    stmia m, {e0, e1}
+
+    add m, #(4 * 4)
+    ldmia m, {e0, e1}
+    rotxy e1, e0, s, c, v
+    stmia m, {e0, e1}
 
     fiq_off
     bx lr
@@ -70,23 +73,25 @@ matrixRotateY_asm:
 
     sincos angle, s, c
 
-    ldr e0, [mat, #0]
-    ldr e1, [mat, #8]
-    rotxy e0, e1, s, c, v
-    str e0, [mat], #8
-    str e1, [mat], #8
+    mov m, r1
 
-    ldr e0, [mat, #0]
-    ldr e1, [mat, #8]
+    ldr e0, [m, #0]
+    ldr e1, [m, #8]
     rotxy e0, e1, s, c, v
-    str e0, [mat], #8
-    str e1, [mat], #8
+    str e0, [m], #8
+    str e1, [m], #8
 
-    ldr e0, [mat, #0]
-    ldr e1, [mat, #8]
+    ldr e0, [m, #0]
+    ldr e1, [m, #8]
     rotxy e0, e1, s, c, v
-    str e0, [mat], #8
-    str e1, [mat], #8
+    str e0, [m], #8
+    str e1, [m], #8
+
+    ldr e0, [m, #0]
+    ldr e1, [m, #8]
+    rotxy e0, e1, s, c, v
+    str e0, [m], #8
+    str e1, [m], #8
 
     fiq_off
     bx lr
@@ -100,19 +105,21 @@ matrixRotateZ_asm:
 
     sincos angle, s, c
 
-    ldmia mat, {e0, e1}
-    rotxy e1, e0, s, c, v
-    stmia mat, {e0, e1}
+    mov m, r1
 
-    add mat, #(4 * 4)
-    ldmia mat, {e0, e1}
+    ldmia m, {e0, e1}
     rotxy e1, e0, s, c, v
-    stmia mat, {e0, e1}
+    stmia m, {e0, e1}
 
-    add mat, #(4 * 4)
-    ldmia mat, {e0, e1}
+    add m, #(4 * 4)
+    ldmia m, {e0, e1}
     rotxy e1, e0, s, c, v
-    stmia mat, {e0, e1}
+    stmia m, {e0, e1}
+
+    add m, #(4 * 4)
+    ldmia m, {e0, e1}
+    rotxy e1, e0, s, c, v
+    stmia m, {e0, e1}
 
     fiq_off
     bx lr

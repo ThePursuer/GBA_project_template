@@ -42,8 +42,7 @@ uint32_t pack_angles(int x, int y, int z) {
 
 bool matrixRotateX_asm_test(){
     // Matrix& m = get_matrix_ptr();
-    Matrix m;
-
+    Matrix m, n;
     m.e00 = int_to_fix16(1);
     m.e01 = int_to_fix16(3);
     m.e02 = int_to_fix16(1);
@@ -60,18 +59,24 @@ bool matrixRotateX_asm_test(){
     m.e13 = int_to_fix16(1);
     m.e23 = int_to_fix16(1);
 
-    auto angles = pack_angles(90, 90, 90);
-    vector3s_t v{1, 1, 1};
-
+    std::memcpy(&n, &m, sizeof(Matrix));
     std::stringstream ss;
-    ss << static_cast<void*>(&m) << std::endl;
+
+    uint16_t delta;
+
     resetTimer();
     startTimer();
-    matrixFrame_asm(v, angles, m);
-    auto delta = stopTimer();
+    matrixRotateX_asm(ANGLE_90, m);
+    delta = stopTimer();
+    ss << "Time asm: " << delta << std::endl;
+    ss << matrix_to_string(m) << std::endl;
 
-    ss << static_cast<void*>(&m) << std::endl;
-    ss << "Time: " << delta << std::endl;
+    resetTimer();
+    startTimer();
+    matrixRotateX_c(n, ANGLE_90);
+    delta = stopTimer();
+    ss << "Time c: " << delta << std::endl;
+    ss << matrix_to_string(n) << std::endl;
 
     gba_os::raise_software_error(ss.str());
     return false;
