@@ -23,10 +23,12 @@
 
 struct Matrix
 {
-    fix16_t e00, e01, e02, e03;
-    fix16_t e10, e11, e12, e13;
-    fix16_t e20, e21, e22, e23;
+    fix14_t e00, e01, e02, e03;
+    fix14_t e10, e11, e12, e13;
+    fix14_t e20, e21, e22, e23;
 };
+
+Matrix& get_matrix_ptr();
 
 inline bool operator==(const Matrix& lhs, const Matrix& rhs)
 {
@@ -38,29 +40,66 @@ inline bool operator==(const Matrix& lhs, const Matrix& rhs)
 inline std::string matrix_to_string(const Matrix& matrix)
 {
     std::stringstream ss;
-    ss << "Matrix: " << std::endl;
-    ss << fix16_to_int(matrix.e00) << ", " << fix16_to_int(matrix.e01) << ", " << fix16_to_int(matrix.e02) << ", " << fix16_to_int(matrix.e03) << std::endl;
-    ss << fix16_to_int(matrix.e10) << ", " << fix16_to_int(matrix.e11) << ", " << fix16_to_int(matrix.e12) << ", " << fix16_to_int(matrix.e13) << std::endl;
-    ss << fix16_to_int(matrix.e20) << ", " << fix16_to_int(matrix.e21) << ", " << fix16_to_int(matrix.e22) << ", " << fix16_to_int(matrix.e23) << std::endl;
+    ss << fix14_to_int(matrix.e00) << ", " << fix14_to_int(matrix.e01) << ", " << fix14_to_int(matrix.e02) << ", " << fix14_to_int(matrix.e03) << std::endl;
+    ss << fix14_to_int(matrix.e10) << ", " << fix14_to_int(matrix.e11) << ", " << fix14_to_int(matrix.e12) << ", " << fix14_to_int(matrix.e13) << std::endl;
+    ss << fix14_to_int(matrix.e20) << ", " << fix14_to_int(matrix.e21) << ", " << fix14_to_int(matrix.e22) << ", " << fix14_to_int(matrix.e23) << std::endl;
+    return ss.str();
+}
+
+inline std::string matrix_to_string_raw(const Matrix& matrix)
+{
+    std::stringstream ss;
+    ss << matrix.e00 << ", " << matrix.e01 << ", " << matrix.e02 << ", " << matrix.e03 << std::endl;
+    ss << matrix.e10 << ", " << matrix.e11 << ", " << matrix.e12 << ", " << matrix.e13 << std::endl;
+    ss << matrix.e20 << ", " << matrix.e21 << ", " << matrix.e22 << ", " << matrix.e23 << std::endl;
     return ss.str();
 }
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 // Function declarations
-void matrixLerp_c(const Matrix &n, Matrix &m, int32_t pmul, int32_t pdiv);
-void matrixSetIdentity_c(Matrix &m);
-void matrixSetBasis_c(Matrix &dst, const Matrix &src);
+void matrixLerp_c(const Matrix &n, Matrix&m, int32_t pmul, int32_t pdiv);
 void matrixTranslateRel_c(Matrix &m, int32_t x, int32_t y, int32_t z);
-void matrixTranslateAbs_c(Matrix &m, int32_t x, int32_t y, int32_t z);
+void matrixTranslateAbs_c(Matrix& m, vector3i_t& cameraPos, int32_t x, int32_t y, int32_t z);
 void matrixTranslateSet_c(Matrix &m, int32_t x, int32_t y, int32_t z);
 void matrixRotateX_c(Matrix &m, int32_t angle);
 void matrixRotateY_c(Matrix &m, int32_t angle);
 void matrixRotateZ_c(Matrix &m, int32_t angle);
 void matrixRotateYQ_c(Matrix &m, int32_t quadrant);
 void matrixRotateYXZ_c(Matrix &m, int32_t angleX, int32_t angleY, int32_t angleZ);
+
+inline void matrixSetBasis_c(Matrix &dst, const Matrix &src)
+{
+    dst.e00 = src.e00;
+    dst.e01 = src.e01;
+    dst.e02 = src.e02;
+
+    dst.e10 = src.e10;
+    dst.e11 = src.e11;
+    dst.e12 = src.e12;
+
+    dst.e10 = src.e10;
+    dst.e11 = src.e11;
+    dst.e12 = src.e12;
+}
+
+inline void matrixSetIdentity_c(Matrix &m) {
+    m.e00 = 0x4000;
+    m.e01 = 0;
+    m.e02 = 0;
+    m.e03 = 0;
+
+    m.e10 = 0;
+    m.e11 = 0x4000;
+    m.e12 = 0;
+    m.e13 = 0;
+
+    m.e20 = 0;
+    m.e21 = 0;
+    m.e22 = 0x4000;
+    m.e23 = 0;
+}
 
 #define ENCODE_ANGLES(x, y, z) \
     (((x >> 2) & 0x3FF0) << 16) | (((y >> 12) & 0x000F) << 16) | (((y << 4) & 0xFC00) | ((z >> 6) & 0x03FF))
@@ -76,7 +115,7 @@ void matrixRotateYXZ_c(Matrix &m, int32_t angleX, int32_t angleY, int32_t angleZ
  *
  * @note This function modifies the position vector and the angles in place.
  */
-void matrixFrame_asm(const vector3s_t& pos, const uint32_t& angles, Matrix& matrix);
+void matrixFrame_asm(const vector3s_t& pos, const uint32_t& angles);
 
 /**
  * @brief Performs a linear interpolation between two matrices.
@@ -89,8 +128,7 @@ void matrixFrame_asm(const vector3s_t& pos, const uint32_t& angles, Matrix& matr
  *
  * @note This function modifies the global matrix pointer in place.
  */
-// void matrixLerp_asm(Matrix& m, int multiplier, int divisor); // unused
-void matrixLerp_c(const Matrix &n, Matrix &m, int32_t pmul, int32_t pdiv);
+void matrixLerp_asm(Matrix& m, int multiplier, int divisor); // unused
 
 /**
  * @brief Pushes the current matrix onto the matrix stack.
@@ -110,7 +148,7 @@ void matrixPush_asm(void);
  *
  * @param angle The angle to rotate by, in degrees.
  */
-int matrixRotateX_asm(int angle, Matrix& matrix);
+int matrixRotateX_asm(int angle);
 
 /**
  * @brief Rotates the current matrix around the Y axis.
@@ -120,7 +158,7 @@ int matrixRotateX_asm(int angle, Matrix& matrix);
  *
  * @param angle The angle to rotate by, in degrees.
  */
-void matrixRotateY_asm(int angle, Matrix& matrix);
+void matrixRotateY_asm(int angle);
 
 /**
  * @brief Rotates the current matrix around the Z axis.
@@ -130,7 +168,7 @@ void matrixRotateY_asm(int angle, Matrix& matrix);
  *
  * @param angle The angle to rotate by, in degrees.
  */
-void matrixRotateZ_asm(int angle, Matrix& matrix);
+void matrixRotateZ_asm(int angle);
 
 /**
  * @brief Rotates the current matrix around the Y, X, and Z axes.
@@ -142,7 +180,7 @@ void matrixRotateZ_asm(int angle, Matrix& matrix);
  * @param angleY The angle to rotate around the Y axis, in degrees.
  * @param angleZ The angle to rotate around the Z axis, in degrees.
  */
-void matrixRotateYXZ_asm(int angleX, int angleY, int angleZ, Matrix& matrix);
+void matrixRotateYXZ_asm(int angleX, int angleY, int angleZ);
 
 /**
  * @brief Rotates the current matrix around the Y axis by a quarter turn.
@@ -152,7 +190,7 @@ void matrixRotateYXZ_asm(int angleX, int angleY, int angleZ, Matrix& matrix);
  *
  * @param q The number of quarter turns to rotate by.
  */
-void matrixRotateYQ_asm(int q, Matrix& matrix);
+void matrixRotateYQ_asm(int q);
 
 /**
  * @brief Sets the basis of a matrix.
@@ -189,7 +227,7 @@ void matrixSetIdentity_asm(Matrix& matrix);
  *
  * @note This function modifies the global matrix pointer in place.
  */
-void matrixTranslateRel_asm(int x, int y, int z, Matrix& matrix);
+void matrixTranslateRel_asm(int x, int y, int z);
 
 /**
  * @brief Translates the current matrix absolutely.
@@ -203,7 +241,7 @@ void matrixTranslateRel_asm(int x, int y, int z, Matrix& matrix);
  *
  * @note This function modifies the global matrix pointer in place.
  */
-void matrixTranslateAbs_asm(int x, int y, int z, Matrix& matrix, vector3i_t* pos);
+void matrixTranslateAbs_asm(int x, int y, int z, vector3i_t* pos);
 
 /**
  * @brief Sets the translation of the current matrix.
@@ -217,7 +255,7 @@ void matrixTranslateAbs_asm(int x, int y, int z, Matrix& matrix, vector3i_t* pos
  *
  * @note This function modifies the global matrix pointer in place.
  */
-void matrixTranslateSet_asm(int x, int y, int z, Matrix& matrix);
+void matrixTranslateSet_asm(int x, int y, int z);
 
 
 #ifdef __cplusplus

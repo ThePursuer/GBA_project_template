@@ -29,7 +29,6 @@ angle   .req r0     // arg
 s       .req r1
 c       .req r2
 v       .req r3
-mat     .req r4
 // FIQ regs
 e0      .req r8
 e1      .req r9
@@ -44,7 +43,8 @@ matrixRotateX_asm:
 
     sincos angle, s, c
 
-    mov m, r1
+    ldr m, =gMatrixPtr
+    ldr m, [m]
 
     add m, m, #4    // skip first column
     ldmia m, {e0, e1}
@@ -73,7 +73,8 @@ matrixRotateY_asm:
 
     sincos angle, s, c
 
-    mov m, r1
+    ldr m, =gMatrixPtr
+    ldr m, [m]
 
     ldr e0, [m, #0]
     ldr e1, [m, #8]
@@ -105,7 +106,8 @@ matrixRotateZ_asm:
 
     sincos angle, s, c
 
-    mov m, r1
+    ldr m, =gMatrixPtr
+    ldr m, [m]
 
     ldmia m, {e0, e1}
     rotxy e1, e0, s, c, v
@@ -127,7 +129,7 @@ matrixRotateZ_asm:
 angleX  .req r0     // arg
 angleY  .req r1     // arg
 angleZ  .req r2     // arg
-e00     .req r3     // arg
+e00     .req r3
 e01     .req r4
 e02     .req r5
 e10     .req r6
@@ -167,15 +169,14 @@ matrixRotateYXZ_fast_asm:   // routine for pre-shifted angles
 
     ldr scLUT, =gSinCosTable
 
-    ldr r4, =mytempvar
-    str r3, [r4]
-
-    mov mm, r3
+    ldr mm, =gMatrixPtr
+    ldr mm, [mm]
     ldmia mm, {e00, e01, e02}
     add mm, #(4 * 4)
     ldmia mm, {e10, e11, e12}
     add mm, #(4 * 4)
     ldmia mm, {e20, e21, e22}
+
 .rotY:
     cmp angleY, #0
     beq .rotX
@@ -207,23 +208,21 @@ matrixRotateYXZ_fast_asm:   // routine for pre-shifted angles
     rotxy e21, e20, sinZ, cosZ, tmp
 
 .done:
+    ldr mm, =gMatrixPtr
+    ldr mm, [mm]
 
-    ldr R14, =mytempvar
-    ldr R14, [R14]
-    mov mm, R14
     stmia mm, {e00, e01, e02}
     add mm, #(4 * 4)
     stmia mm, {e10, e11, e12}
     add mm, #(4 * 4)
     stmia mm, {e20, e21, e22}
 
-    @ mov r3, R14
     fiq_off
     ldmfd sp!, {r4-r7}
     bx lr
 
 q   .req r0     // arg
-n   .req r1     // arg
+n   .req r1
 mx  .req r3
 my  .req q
 
@@ -231,6 +230,9 @@ my  .req q
 matrixRotateYQ_asm:
     cmp q, #2
     bxeq lr
+
+    ldr n, =gMatrixPtr
+    ldr n, [n]
 
     cmp q, #0
     beq .q_0
@@ -299,7 +301,3 @@ matrixRotateYQ_asm:
     str my, [n, #32]
     str mx, [n, #40]
     bx lr
-
-.data
-
-mytempvar: .word 0x00000000

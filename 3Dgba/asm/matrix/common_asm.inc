@@ -91,7 +91,7 @@
 .equ SND_VOL_SHIFT,     6
 .equ SND_FIXED_SHIFT,   8
 
-// res = divTable[x] (uint16_t)
+// res = divTable[x] (uint16)
 .macro divLUT res, x
     add \res, \x, #DIVLUT_ADDR
     ldrh \res, [\res, \x]
@@ -122,13 +122,13 @@
 
 .macro scaleUV uv, tmp, unused, f
     asrs \tmp, \uv, #16
-    mulne \tmp, \f, \tmp            // u = f * int16_t(uv >> 16)
+    mulne \tmp, \f, \tmp            // u = f * int16(uv >> 16)
     lsrne \tmp, #16
     lslne \tmp, #16
 
     lsls \uv, \uv, #16
     asrne \uv, #16
-    mulne \uv, \f, \uv              // v = f * int16_t(uv)
+    mulne \uv, \f, \uv              // v = f * int16(uv)
 
     orr \uv, \tmp, \uv, lsr #16     // uv = (u & 0xFFFF0000) | (v >> 16)
 .endm

@@ -3,7 +3,7 @@
 x   .req r0     // arg
 y   .req r1     // arg
 z   .req r2     // arg
-m   .req r3     // arg
+m   .req r3
 // FIQ regs
 e0  .req r8
 e1  .req r9
@@ -24,6 +24,9 @@ vz  .req e4
 .global matrixTranslateRel_asm
 matrixTranslateRel_asm:
     fiq_on
+
+    ldr m, =gMatrixPtr
+    ldr m, [m]
 
     // x
     ldmia m!, {e0, e1, e2, vx, e3, e4, e5}
@@ -46,21 +49,21 @@ matrixTranslateRel_asm:
     mla vz, e8, z, vz
     str vz, [m, #16]
 
-    sub m, m, #0x1C
-
     fiq_off
     bx lr
 
 .global matrixTranslateAbs_asm
 matrixTranslateAbs_asm:
-    ldr r4, [sp, #0]
     fiq_on
 
-    mov v, r4
+    ldr v, =gCameraViewPos
     ldmia v, {e0, e1, e2}
     sub x, x, e0
     sub y, y, e1
     sub z, z, e2
+
+    ldr m, =gMatrixPtr
+    ldr m, [m]
 
     // x
     ldmia m!, {e0, e1, e2}
@@ -89,6 +92,9 @@ matrixTranslateAbs_asm:
 .global matrixTranslateSet_asm
 matrixTranslateSet_asm:
     fiq_on
+
+    ldr m, =gMatrixPtr
+    ldr m, [m]
 
     // x
     ldmia m!, {e0, e1, e2}

@@ -4,9 +4,8 @@ pos     .req r0     // arg
 angles  .req r1     // arg
 x       .req pos
 y       .req angles
-z       .req r2    // arg
-matrix  .req r3
-mask    .req r4
+z       .req r2
+mask    .req r3
 packed  .req r12
 
 .extern matrixTranslateRel_asm, matrixRotateYXZ_fast_asm
@@ -14,8 +13,7 @@ packed  .req r12
 .global matrixFrame_asm
 matrixFrame_asm:
     stmfd sp!, {lr}
-    
-    mov r3, r2 // move matrix to r3
+
     ldr packed, [angles]
     ldrsh z, [pos, #4]
     ldrsh y, [pos, #2]

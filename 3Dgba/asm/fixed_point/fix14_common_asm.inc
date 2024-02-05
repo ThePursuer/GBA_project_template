@@ -9,7 +9,6 @@
 // 
 // .equ fix16_maximum, 0x7FFFFFFF
 // .equ fix16_minimum, 0x80000000
-.equ fix16_overflow, 0x80000000
 // 
 // .equ fix16_pi, 205887
 // .equ fix16_e, 178145

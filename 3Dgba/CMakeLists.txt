@@ -7,11 +7,15 @@ set(
     ASM_FILES
     asm/matrix/matrixFrame.s
     asm/matrix/matrixRotate.s
+    asm/matrix/matrixLerp.s
     asm/matrix/matrixSetBasis.s
     asm/matrix/matrixSetIdentity.s
     asm/matrix/matrixTranslate.s
+    asm/matrix/matrixPush.s
 
-    asm/fixed_point/fix16_mul.s
+    asm/fixed_point/fix14_mul.s
+    asm/fixed_point/sdiv32.s
+    asm/fixed_point/udiv32.s
 )
 
 set(

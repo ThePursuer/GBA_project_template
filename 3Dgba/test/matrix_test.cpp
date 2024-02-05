@@ -7,6 +7,7 @@
 #include <cstring>
 #include <sstream>
 #include <iostream>
+#include <bitset>
 
 #include <gba.h>
 
@@ -41,42 +42,40 @@ uint32_t pack_angles(int x, int y, int z) {
 }
 
 bool matrixRotateX_asm_test(){
-    // Matrix& m = get_matrix_ptr();
-    Matrix m, n;
-    m.e00 = int_to_fix16(1);
-    m.e01 = int_to_fix16(3);
-    m.e02 = int_to_fix16(1);
+    Matrix& m = get_matrix_ptr();
+    Matrix n;
+    n.e00 = int_to_fix14(1);
+    n.e01 = int_to_fix14(2);
+    n.e02 = int_to_fix14(3);
+    n.e03 = int_to_fix14(4);
 
-    m.e10 = int_to_fix16(3);
-    m.e11 = int_to_fix16(1);
-    m.e12 = int_to_fix16(1);
+    n.e10 = int_to_fix14(5);
+    n.e11 = int_to_fix14(6);
+    n.e12 = int_to_fix14(7);
+    n.e13 = int_to_fix14(8);
 
-    m.e20 = int_to_fix16(31);
-    m.e21 = int_to_fix16(1);
-    m.e22 = int_to_fix16(1);
-    
-    m.e03 = int_to_fix16(1);
-    m.e13 = int_to_fix16(1);
-    m.e23 = int_to_fix16(1);
+    n.e20 = int_to_fix14(9);
+    n.e21 = int_to_fix14(10);
+    n.e22 = int_to_fix14(11);
+    n.e23 = int_to_fix14(12);
+    m = n;
 
-    std::memcpy(&n, &m, sizeof(Matrix));
     std::stringstream ss;
-
     uint16_t delta;
 
     resetTimer();
     startTimer();
-    matrixRotateX_asm(ANGLE_90, m);
+    matrixTranslateRel_c(n, 1, 1, 1);
     delta = stopTimer();
-    ss << "Time asm: " << delta << std::endl;
-    ss << matrix_to_string(m) << std::endl;
+    ss << matrix_to_string(n) << std::endl;
+    ss << "C++ time: " << delta << std::endl;
 
     resetTimer();
     startTimer();
-    matrixRotateX_c(n, ANGLE_90);
+    matrixTranslateRel_asm(1, 1, 1);
     delta = stopTimer();
-    ss << "Time c: " << delta << std::endl;
-    ss << matrix_to_string(n) << std::endl;
+    ss << matrix_to_string(m) << std::endl;
+    ss << "asm switch time: " << delta << std::endl;
 
     gba_os::raise_software_error(ss.str());
     return false;
