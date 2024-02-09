@@ -5,17 +5,11 @@ project(3Dgba VERSION 0.1.0 LANGUAGES ASM CXX C)
 # Add the assembly files to the project
 set(
     ASM_FILES
-    asm/matrix/matrixFrame.s
-    asm/matrix/matrixRotate.s
-    asm/matrix/matrixLerp.s
-    asm/matrix/matrixSetBasis.s
-    asm/matrix/matrixSetIdentity.s
-    asm/matrix/matrixTranslate.s
-    asm/matrix/matrixPush.s
-
     asm/fixed_point/fix14_mul.s
     asm/fixed_point/sdiv32.s
     asm/fixed_point/udiv32.s
+
+    asm/box/boxTranslate.s
 )
 
 set(
@@ -23,6 +17,9 @@ set(
     src/matrix.cpp
     src/sincos.cpp
     src/fixdivtable.cpp
+    src/box.cpp
+    src/rasterize.cpp
+    # src/transform.cpp
 )
 
 # Create the library target

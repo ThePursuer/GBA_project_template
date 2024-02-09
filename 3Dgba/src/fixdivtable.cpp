@@ -1,7 +1,7 @@
 #include <3Dgba/math.h>
 
 #include <gba.h>
-
+#define DIV_TABLE_SIZE   1025
 EWRAM_DATA __attribute__((aligned(16))) uint16_t divTable[DIV_TABLE_SIZE] = { // must be at EWRAM start
     0x0000, 0x7FFF, 0x7FFF, 0x5555, 0x4000, 0x3333, 0x2AAA, 0x2492,
     0x2000, 0x1C71, 0x1999, 0x1745, 0x1555, 0x13B1, 0x1249, 0x1111,

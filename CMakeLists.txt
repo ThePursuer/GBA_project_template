@@ -7,30 +7,15 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Set the project name and version
-project(my_gba_project VERSION 1.0)
+project(my_gba_project VERSION 1.0 LANGUAGES C CXX ASM)
 
 set(CMAKE_CXX_STANDARD 20)
 
-FetchContent_Declare(
-  libfixmath
-  GIT_REPOSITORY https://github.com/PetteriAimonen/libfixmath
-  GIT_TAG d308e466e1a09118d03f677c52e5fbf402f6fdd0
-  PATCH_COMMAND git apply ${PROJECT_SOURCE_DIR}/patches/libfixmath.patch
-)
-FetchContent_MakeAvailable(libfixmath)
+# dkp_add_embedded_binary_library(meshes cube.obj cube.mtl)
 
-target_compile_definitions(libfixmath PUBLIC
-    FIXMATH_FAST_SIN
-    FIXMATH_NO_64BIT
-    FIXMATH_NO_CACHE
-    FIXMATH_NO_HARD_DIVISION
-    # FIXMATH_NO_OVERFLOW
-    # FIXMATH_NO_ROUNDING
-    # FIXMATH_OPTIMIZE_8BIT
-)
-
-dkp_add_embedded_binary_library(meshes cube.obj cube.mtl)
-
+# Set WITH_UNIT_TESTS option for GBA_OS subproject
+set(WITH_UNIT_TESTS ON CACHE BOOL "Enable unit tests for GBA_OS" FORCE)
 add_subdirectory(GBA_OS)
 # add_subdirectory(ECS)
-add_subdirectory(src)
+# add_subdirectory(src)
+add_subdirectory(3Dgba)

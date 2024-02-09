@@ -11,8 +11,8 @@ std::vector<TestCase> testCases;
 std::ostringstream testBuffer;
 
 // Function to register a test case
-void RegisterTest(const std::string& name, std::function<bool()> testFunc) {
-    testCases.push_back({name, testFunc});
+void RegisterTest(const std::string& name, std::function<bool(std::ostringstream&)> testFunc) {
+    testCases.push_back({name, testFunc, std::ostringstream()});
 }
 
 // Function to run all registered test cases and capture results in the buffer
@@ -20,19 +20,20 @@ void RunTests() {
     int passedCount = 0;
     int totalCount = testCases.size();
 
-    for (const TestCase& testCase : testCases) {
+    for (TestCase& testCase : testCases) {
         testBuffer << testCase.name;
 
-        bool result = testCase.testFunc();
+        bool result = testCase.testFunc(testCase.err);
         if (result) {
-            testBuffer << "[PASS]\n";
+            testBuffer << "[PASS]" << std::endl;
             passedCount++;
         } else {
-            testBuffer << "[FAIL]\n";
+            testBuffer << "[FAIL]" << std::endl;
+            testBuffer << testCase.err.str() << std::endl;
         }
     }
 
-    testBuffer << "\n" << passedCount << "/" << totalCount << " tests passed.\n";
+    testBuffer << std::endl << passedCount << "/" << totalCount << " tests passed." << std::endl;
 }
 
 // Function to display up to 20 lines from the buffer starting from a given line
@@ -56,7 +57,7 @@ void DisplayTestResults(int startLine) {
 
     // Print up to 20 lines starting from the specified line
     for (int i = startLine; i < endLine; ++i) {
-        printf("%s", lines[i].c_str());
+        printf("%s\n", lines[i].c_str());
     }
 }
 
@@ -76,20 +77,25 @@ void test_results_task(gba_os::Task& t){
     static int display_line = 0;
     static const int line_count = CountLines();
 
+    static bool rerender = true;
+
     if(buttons & KEY_UP){
         display_line++;
         if(display_line > line_count - 1){
             display_line = line_count - 1;
         }
+        rerender = true;
     }
     if(buttons & KEY_DOWN){
         display_line--;
         if(display_line < 0){
             display_line = 0;
         }
+        rerender = true;
     }
-
-    DisplayTestResults(display_line);
+    if(rerender)
+        DisplayTestResults(display_line);
+    rerender = false;
 }
 
 } // namespace gba_os::test

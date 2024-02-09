@@ -22,44 +22,6 @@ void matrixFrame_c(const void* pos, const void* angles)
     matrixTranslateRel(posX, posY, posZ);
     matrixRotateYXZ(aX, aY, aZ);
 }
-
-void boxTranslate_c(AABBi &box, int32 x, int32 y, int32 z)
-{
-    box.minX += x;
-    box.maxX += x;
-    box.minY += y;
-    box.maxY += y;
-    box.minZ += z;
-    box.maxZ += z;
-}
-
-void boxRotateYQ_c(AABBi &box, int32 quadrant)
-{
-    if (quadrant == 2)
-        return;
-
-    int32 minX = box.minX;
-    int32 maxX = box.maxX;
-    int32 minZ = box.minZ;
-    int32 maxZ = box.maxZ;
-
-    if (quadrant == 3) {
-        box.minX = minZ;
-        box.maxX = maxZ;
-        box.minZ = -maxX;
-        box.maxZ = -minX;
-    } else if (quadrant == 1) {
-        box.minX = -maxZ;
-        box.maxX = -minZ;
-        box.minZ = minX;
-        box.maxZ = maxX;
-    } else if (quadrant == 0) {
-        box.minX = -maxX;
-        box.maxX = -minX;
-        box.minZ = -maxZ;
-        box.maxZ = -minZ;
-    }
-}
 #endif
 
 void matrixFrameLerp(const void* pos, const void* anglesA, const void* anglesB, int32 delta, int32 rate)

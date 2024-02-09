@@ -19,7 +19,7 @@ IWRAM_CODE std::chrono::time_point<GbaClock> GbaClock::now() noexcept {
 
 GbaClock::GbaClock() {
     REG_TM3CNT_L = 0; // reset timer value
-    REG_TM3CNT_H = TIMER_START | TIMER_IRQ | TIMER_COUNT; // start timer with interrupts enabled, maximum prescale
+    REG_TM3CNT_H = TIMER_START | TIMER_IRQ | TIMER_COUNT | 0b00; // start timer with interrupts enabled, maximum prescale
     REG_TM3CNT_H &= ~(1 << 2);
     irqSet(IRQ_TIMER3, &GbaClock::irq_handler);
     irqEnable(IRQ_TIMER3);

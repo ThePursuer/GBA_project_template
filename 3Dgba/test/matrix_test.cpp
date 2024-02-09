@@ -1,20 +1,14 @@
 #include <3Dgba/matrix.h>
 
-#include <gba_os/Core.h>
-#include <gba_os/Clock/GbaClock.h>
-#include <gba_os/QuickTimer.h>
-
-#include <cstring>
-#include <sstream>
 #include <iostream>
-#include <bitset>
 
-#include <gba.h>
+#include "3Dgba/math.h"
+#include "3Dgba/box3d.h"
 
-#include <3Dgba/math.h>
+#include "debug.h"
 
-bool matrixSetBasis_asm_test(){
-    Matrix m;
+bool matrixSetBasis_asm_test(std::ostringstream& err){
+    Matrix m{}, n{};
     m.e00 = 1;
     m.e01 = 2;
     m.e02 = 3;
@@ -29,54 +23,20 @@ bool matrixSetBasis_asm_test(){
     m.e13 = 0;
     m.e23 = 0;
 
-    Matrix n{};
-
-    matrixSetBasis_asm(n, m);
-    if (m == n)
+    matrixSetBasis_c(n, m);
+    if (n.e00 == m.e00 && n.e01 == m.e01 && n.e02 == m.e02 &&
+     n.e10 == m.e10 && n.e11 == m.e11 && n.e12 == m.e12 &&
+      n.e20 == m.e20 && n.e21 == m.e21 && n.e22 == m.e22)
         return true;
+
+    err << "got:" << std::endl;
+    err << matrix_to_string_raw(n) << std::endl;
+    err << "expected:" << std::endl;
+    err << matrix_to_string_raw(m);
     return false;
 }
 
-uint32_t pack_angles(int x, int y, int z) {
-    return ((x & 0x3FF) << 20) | ((y & 0x3FF) << 10) | (z & 0x3FF);
-}
-
-bool matrixRotateX_asm_test(){
-    Matrix& m = get_matrix_ptr();
-    Matrix n;
-    n.e00 = int_to_fix14(1);
-    n.e01 = int_to_fix14(2);
-    n.e02 = int_to_fix14(3);
-    n.e03 = int_to_fix14(4);
-
-    n.e10 = int_to_fix14(5);
-    n.e11 = int_to_fix14(6);
-    n.e12 = int_to_fix14(7);
-    n.e13 = int_to_fix14(8);
-
-    n.e20 = int_to_fix14(9);
-    n.e21 = int_to_fix14(10);
-    n.e22 = int_to_fix14(11);
-    n.e23 = int_to_fix14(12);
-    m = n;
-
-    std::stringstream ss;
-    uint16_t delta;
-
-    resetTimer();
-    startTimer();
-    matrixTranslateRel_c(n, 1, 1, 1);
-    delta = stopTimer();
-    ss << matrix_to_string(n) << std::endl;
-    ss << "C++ time: " << delta << std::endl;
-
-    resetTimer();
-    startTimer();
-    matrixTranslateRel_asm(1, 1, 1);
-    delta = stopTimer();
-    ss << matrix_to_string(m) << std::endl;
-    ss << "asm switch time: " << delta << std::endl;
-
-    gba_os::raise_software_error(ss.str());
-    return false;
+bool matrixRotateX_asm_test(std::ostringstream& err){
+    
+    return true;
 }

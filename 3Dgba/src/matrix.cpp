@@ -1,15 +1,12 @@
 #include "3Dgba/matrix.h"
 
-#include <cstring>
-
-#include <gba.h>
 
 #define MAX_MATRICES 8
-Matrix gMatrixStack[MAX_MATRICES];
-Matrix* gMatrixPtr = gMatrixStack;
+IWRAM_DATA Matrix gMatrixStack[MAX_MATRICES];
+IWRAM_DATA Matrix* gMatrixPtr = gMatrixStack;
 Matrix& get_matrix_ptr() { return *gMatrixPtr; }
 
-IWRAM_DATA vector3i_t gCameraViewPos;
+IWRAM_DATA Vector3i_t gCameraViewPos;
 
 #define one_third 5460
 #define one_fifth 3267
@@ -107,12 +104,6 @@ slow_case:
     LERP_MATRIX(LERP_SLOW);
 }
 
-// Dot product of two 4D vectors (ax, ay, az, aw) and (bx, by, bz)
-#define DP43(ax,ay,az,aw,bx,by,bz)  (ax * bx + ay * by + az * bz + (aw << MATRIX_FIXED_SHIFT))
-
-// Dot product of two 3D vectors (ax, ay, az) and (bx, by, bz)
-#define DP33(ax,ay,az,bx,by,bz)     (ax * bx + ay * by + az * bz)
-
 #define MATRIX_TRANS(m,x,y,z)\
     int32_t tx = DP33(m.e00, m.e01, m.e02, x, y, z);\
     int32_t ty = DP33(m.e10, m.e11, m.e12, x, y, z);\
@@ -125,7 +116,7 @@ IWRAM_CODE ARM_CODE void matrixTranslateRel_c(Matrix&m, int32_t x, int32_t y, in
     m.e23 += DP33(m.e20, m.e21, m.e22, x, y, z);
 }
 
-IWRAM_CODE ARM_CODE void matrixTranslateAbs_c(Matrix& m, vector3i_t& cameraPos, int32_t x, int32_t y, int32_t z)
+IWRAM_CODE ARM_CODE void matrixTranslateAbs_c(Matrix& m, Vector3i_t& cameraPos, int32_t x, int32_t y, int32_t z)
 {
     x -= cameraPos.x;
     y -= cameraPos.y;
