@@ -141,89 +141,121 @@ IWRAM_CODE ARM_CODE void matrixTranslateSet_c(Matrix& m, int32_t x, int32_t y, i
     c = int32_t(sc) << 16 >> 16;\
 }
 
-inline int32_t X_ROTX(int32_t x, int32_t y, int32_t s, int32_t c) {
-    return ((x * c - y * s) >> FIXED_SHIFT);
-}
-
-inline int32_t X_ROTY(int32_t x, int32_t y, int32_t s, int32_t c) {
-    return ((y * c + x * s) >> FIXED_SHIFT);
-}
-
-inline void X_ROTXY(int32_t& x, int32_t& y, int32_t s, int32_t c) {
-    int32_t _x = X_ROTX(x, y, s, c);
-    int32_t _y = X_ROTY(x, y, s, c);
-    x = _x;
-    y = _y;
-}
-
 // Any changes to the following 3 functions should be added to the inline versions below
 IWRAM_CODE ARM_CODE void matrixRotateX_c(Matrix& m, int32_t angle)
 {
-    int32_t s, c;
+    int32_t s, c, tmp;
     sincos(angle, s, c);
 
-    X_ROTXY(m.e02, m.e01, s, c);
-    X_ROTXY(m.e12, m.e11, s, c);
-    X_ROTXY(m.e22, m.e21, s, c);
+    tmp = (m.e02 * c - m.e01 * s) >> FIXED_SHIFT;
+    m.e01 = ((m.e01 * c + m.e02 * s) >> FIXED_SHIFT);
+    m.e02 = tmp;
+
+    tmp = (m.e12 * c - m.e11 * s) >> FIXED_SHIFT;
+    m.e11 = ((m.e11 * c + m.e12 * s) >> FIXED_SHIFT);
+    m.e12 = tmp;
+
+    tmp = (m.e22 * c - m.e21 * s) >> FIXED_SHIFT;
+    m.e21 = ((m.e21 * c + m.e22 * s) >> FIXED_SHIFT);
+    m.e22 = tmp;
 }
 
 IWRAM_CODE ARM_CODE void matrixRotateY_c(Matrix& m, int32_t angle)
 {
-    int32_t s, c;
+    int32_t s, c, tmp;
     sincos(angle, s, c);
 
-    X_ROTXY(m.e00, m.e02, s, c);
-    X_ROTXY(m.e10, m.e12, s, c);
-    X_ROTXY(m.e20, m.e22, s, c);
+    tmp = (m.e00 * c - m.e02 * s) >> FIXED_SHIFT;
+    m.e02 = ((m.e02 * c + m.e00 * s) >> FIXED_SHIFT);
+    m.e00 = tmp;
+
+    tmp = (m.e10 * c - m.e12 * s) >> FIXED_SHIFT;
+    m.e12 = ((m.e12 * c + m.e10 * s) >> FIXED_SHIFT);
+    m.e10 = tmp;
+
+    tmp = (m.e20 * c - m.e22 * s) >> FIXED_SHIFT;
+    m.e22 = ((m.e22 * c + m.e20 * s) >> FIXED_SHIFT);
+    m.e20 = tmp;
 }
 
 IWRAM_CODE ARM_CODE void matrixRotateZ_c(Matrix& m, int32_t angle)
 {
-    int32_t s, c;
+    int32_t s, c, tmp;
     sincos(angle, s, c);
+    
+    tmp = (m.e01 * c - m.e00 * s) >> FIXED_SHIFT;
+    m.e00 = ((m.e00 * c + m.e01 * s) >> FIXED_SHIFT);
+    m.e01 = tmp;
 
-    X_ROTXY(m.e01, m.e00, s, c);
-    X_ROTXY(m.e11, m.e10, s, c);
-    X_ROTXY(m.e21, m.e20, s, c);
+    tmp = (m.e11 * c - m.e10 * s) >> FIXED_SHIFT;
+    m.e10 = ((m.e10 * c + m.e11 * s) >> FIXED_SHIFT);
+    m.e11 = tmp;
+
+    tmp = (m.e21 * c - m.e20 * s) >> FIXED_SHIFT;
+    m.e20 = ((m.e20 * c + m.e21 * s) >> FIXED_SHIFT);
+    m.e21 = tmp;
 }
-
 
 // These functions should be kept in sync with the non inline functions above. They are here for perfomance reasons.
 __always_inline IWRAM_CODE ARM_CODE void matrixRotateX_c_inline(Matrix& m, int32_t angle)
 {
-    int32_t s, c;
+    int32_t s, c, tmp;
     sincos(angle, s, c);
 
-    X_ROTXY(m.e02, m.e01, s, c);
-    X_ROTXY(m.e12, m.e11, s, c);
-    X_ROTXY(m.e22, m.e21, s, c);
+    tmp = (m.e02 * c - m.e01 * s) >> FIXED_SHIFT;
+    m.e01 = ((m.e01 * c + m.e02 * s) >> FIXED_SHIFT);
+    m.e02 = tmp;
+
+    tmp = (m.e12 * c - m.e11 * s) >> FIXED_SHIFT;
+    m.e11 = ((m.e11 * c + m.e12 * s) >> FIXED_SHIFT);
+    m.e12 = tmp;
+
+    tmp = (m.e22 * c - m.e21 * s) >> FIXED_SHIFT;
+    m.e21 = ((m.e21 * c + m.e22 * s) >> FIXED_SHIFT);
+    m.e22 = tmp;
 }
 
 __always_inline IWRAM_CODE ARM_CODE void matrixRotateY_c_inline(Matrix& m, int32_t angle)
 {
-    int32_t s, c;
+    int32_t s, c, tmp;
     sincos(angle, s, c);
 
-    X_ROTXY(m.e00, m.e02, s, c);
-    X_ROTXY(m.e10, m.e12, s, c);
-    X_ROTXY(m.e20, m.e22, s, c);
+    tmp = (m.e00 * c - m.e02 * s) >> FIXED_SHIFT;
+    m.e02 = ((m.e02 * c + m.e00 * s) >> FIXED_SHIFT);
+    m.e00 = tmp;
+
+    tmp = (m.e10 * c - m.e12 * s) >> FIXED_SHIFT;
+    m.e12 = ((m.e12 * c + m.e10 * s) >> FIXED_SHIFT);
+    m.e10 = tmp;
+
+    tmp = (m.e20 * c - m.e22 * s) >> FIXED_SHIFT;
+    m.e22 = ((m.e22 * c + m.e20 * s) >> FIXED_SHIFT);
+    m.e20 = tmp;
 }
 
 __always_inline IWRAM_CODE ARM_CODE void matrixRotateZ_c_inline(Matrix& m, int32_t angle)
 {
-    int32_t s, c;
+    int32_t s, c, tmp;
     sincos(angle, s, c);
+    
+    tmp = (m.e01 * c - m.e00 * s) >> FIXED_SHIFT;
+    m.e00 = ((m.e00 * c + m.e01 * s) >> FIXED_SHIFT);
+    m.e01 = tmp;
 
-    X_ROTXY(m.e01, m.e00, s, c);
-    X_ROTXY(m.e11, m.e10, s, c);
-    X_ROTXY(m.e21, m.e20, s, c);
+    tmp = (m.e11 * c - m.e10 * s) >> FIXED_SHIFT;
+    m.e10 = ((m.e10 * c + m.e11 * s) >> FIXED_SHIFT);
+    m.e11 = tmp;
+
+    tmp = (m.e21 * c - m.e20 * s) >> FIXED_SHIFT;
+    m.e20 = ((m.e20 * c + m.e21 * s) >> FIXED_SHIFT);
+    m.e21 = tmp;
 }
 
 IWRAM_CODE ARM_CODE void matrixRotateYXZ_c(Matrix& m, int32_t angleX, int32_t angleY, int32_t angleZ)
 {
-    if (angleY) matrixRotateY_c_inline(m, angleY);
-    if (angleX) matrixRotateX_c_inline(m, angleX);
-    if (angleZ) matrixRotateZ_c_inline(m, angleZ);
+    matrixRotateY_c_inline(m, angleY);
+    matrixRotateX_c_inline(m, angleX);
+    matrixRotateZ_c_inline(m, angleZ);
 }
 
 IWRAM_CODE ARM_CODE void matrixRotateYQ_c(Matrix& m, int32_t quadrant)

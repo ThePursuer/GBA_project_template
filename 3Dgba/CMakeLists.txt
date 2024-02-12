@@ -19,7 +19,9 @@ set(
     src/fixdivtable.cpp
     src/box.cpp
     src/rasterize.cpp
-    # src/transform.cpp
+
+    src/division_table.cpp
+    src/assem_test.cpp
 )
 
 # Create the library target

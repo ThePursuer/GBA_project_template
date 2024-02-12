@@ -48,7 +48,7 @@ struct Vector3i_t
 
 struct Vector2s_t
 {
-    int16_t x, y;
+    fix7_t x, y;
 
     Vector2s_t operator+(const Vector2s_t& other) const
     {
@@ -87,6 +87,11 @@ struct Vector2c_t{
     bool operator!=(const Vector2c_t& other) const
     {
         return x != other.x || y != other.y;
+    }
+
+    Vector2c_t operator=(const Vector2c_t& other) const
+    {
+        return { other.x, other.y };
     }
 };
 

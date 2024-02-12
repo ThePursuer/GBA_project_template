@@ -4,6 +4,7 @@ set(
     test_main.cpp
     matrix_test.cpp
     rasterize_test.cpp
+    math_test.cpp
 )
 
 add_executable(3Dgba_unit_test ${SRC_FILES})

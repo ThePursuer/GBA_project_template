@@ -9,11 +9,14 @@
 EWRAM_CODE void run_console_test(){
     gba_os::init_gba_os();
     gba_os::console::initialize_console();
-    
+
     // Example tests
-    gba_os::test::RegisterTest("matrixSetBasis_test", &matrixSetBasis_asm_test);
-    gba_os::test::RegisterTest("matrixRotateX_test", &matrixRotateX_asm_test);
-    gba_os::test::RegisterTest("sort_inplace_test", &sort_inplace_test);
+    // gba_os::test::RegisterTest("matrixSetBasis_test", &matrixSetBasis_asm_test);
+    // gba_os::test::RegisterTest("matrixRotateX_test", &matrixRotateX_asm_test);
+    // gba_os::test::RegisterTest("sort_inplace_test", &sort_inplace_test);
+    // gba_os::test::RegisterTest("fix7_test", &fix7_test);
+    // gba_os::test::RegisterTest("assem_test", &assem_test);
+    gba_os::test::RegisterTest("matrix_time_test", &matrix_time_test);
 
     // Run all registered tests
     gba_os::test::RunTests();

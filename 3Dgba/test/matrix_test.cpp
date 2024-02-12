@@ -7,7 +7,7 @@
 
 #include "debug.h"
 
-bool matrixSetBasis_asm_test(std::ostringstream& err){
+bool matrixSetBasis_asm_test(std::stringstream& err){
     Matrix m{}, n{};
     m.e00 = 1;
     m.e01 = 2;
@@ -36,7 +36,21 @@ bool matrixSetBasis_asm_test(std::ostringstream& err){
     return false;
 }
 
-bool matrixRotateX_asm_test(std::ostringstream& err){
-    
+bool matrix_time_test(std::stringstream& err){
+    Matrix m{}, n{};
+    m.e00 = 1;
+    m.e01 = 2;
+    m.e02 = 3;
+    m.e10 = 4;
+    m.e11 = 5;
+    m.e12 = 6;
+    m.e20 = 7;
+    m.e21 = 8;
+    m.e22 = 9;
+
+    m.e03 = 0;
+    m.e13 = 0;
+    m.e23 = 0;
+
     return true;
 }

@@ -14,13 +14,13 @@ struct transformed_face{
     uint8_t color;
 };
 
-union vertex_int16_u{
-    Vector2c_t v;
-    int16_t i;
+union vertex_int32_u{
+    Vector2s_t v;
+    int32_t i;
 };
 
-void sort_inplace(vertex_int16_u (&a)[3]);
-void drawTriangle(Vector2c_t (&tri)[3], void* fb);
+void sort_inplace(vertex_int32_u (&a)[3]);
+void drawTriangle(Vector2s_t (&tri)[3], void* fb);
 void add_transformed_face(const Triangle2Ds_t& triangle, const uint16_t depth, const uint8_t color);
 
 void rasterize(void* fb);
