@@ -4,7 +4,8 @@
 #include <cstdint>
 #include <array>
 
-#include "3Dgba/math.h"
+#include "3Dgba/math/fix7.h"
+#include "3Dgba/math/fix14.h"
 
 struct Vector3s_t
 {

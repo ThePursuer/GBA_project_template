@@ -1,6 +1,6 @@
-#include "3Dgba/division_table.h"
+#include "3Dgba/math/division_table_7_16.h"
 
-int16_t division_table[1027] = {
+__attribute__((aligned(16), section(".ewram"))) int16_t division_table_7_16[1027] = {
     16385, 8193, 5462, 4097, 3277, 2731, 2341, 2049, 1821, 1639,
     1490, 1366, 1261, 1171, 1093, 1025, 964, 911, 863, 820,
     781, 745, 713, 683, 656, 631, 607, 586, 565, 547,

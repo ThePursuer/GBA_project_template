@@ -1,4 +1,4 @@
-#include "3Dgba/math.h"
+#include "3Dgba/math/math.h"
 
 const uint32_t gSinCosTable[4096] = { // ROM
     0x00004000, 0x00194000, 0x00324000, 0x004B4000, 0x00654000, 0x007E4000, 0x00973FFF, 0x00B03FFF,

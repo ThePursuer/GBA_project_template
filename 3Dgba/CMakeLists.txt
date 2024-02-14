@@ -5,23 +5,21 @@ project(3Dgba VERSION 0.1.0 LANGUAGES ASM CXX C)
 # Add the assembly files to the project
 set(
     ASM_FILES
-    asm/fixed_point/fix14_mul.s
-    asm/fixed_point/sdiv32.s
-    asm/fixed_point/udiv32.s
+    asm/math/sdiv32.s
+    asm/math/udiv32.s
 
     asm/box/boxTranslate.s
 )
 
 set(
     SRC_FILES
-    src/matrix.cpp
-    src/sincos.cpp
-    src/fixdivtable.cpp
+    src/math/matrix.cpp
+    src/math/sincos.cpp
+    src/math/division_table_7_16.cpp
+    src/math/division_table_14_32.cpp
+
     src/box.cpp
     src/rasterize.cpp
-
-    src/division_table.cpp
-    src/assem_test.cpp
 )
 
 # Create the library target

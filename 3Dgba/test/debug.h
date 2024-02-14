@@ -4,8 +4,8 @@
 #include <sstream>
 #include <string>
 
-#include <3Dgba/math.h>
-#include <3Dgba/matrix.h>
+#include <3Dgba/math/math.h>
+#include <3Dgba/math/matrix.h>
 
 inline std::string matrix_to_string(const Matrix& matrix)
 {

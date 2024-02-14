@@ -1,4 +1,5 @@
-#include <3Dgba/math.h>
+#include <3Dgba/math/fix7.h>
+#include <3Dgba/math/fix14.h>
 
 #include <iostream>
 #include <sstream>
@@ -31,7 +32,7 @@ bool fix7_test(std::stringstream& err){
     fix7_t d = fix7_div(a, b);
     if (d != 96){
         err << "fix7_div failed: " << a << "/" << b << "=" << d << std::endl;
-        err << "index: " << std::to_string((b >> 5) - 1) << " shifted by: " << (7 + DIVISION_TABLE_PRECISION) << std::endl;
+        err << "index: " << std::to_string(DIV_TABLE_7_16_INDEX(b)) << " shifted by: " << (7 + DIVISION_TABLE_7_16_PRECISION) << std::endl;
         return false;
     }
 
@@ -48,39 +49,39 @@ bool fix7_test(std::stringstream& err){
     return true;
 }
 
-__always_inline void fix7_mul_c(fix7_t &a, fix7_t b){
-    a = ((a >> 3) * (b >> 3));
-};
-__always_inline fix7_t fix7_mul_asm(fix7_t a, const fix7_t b){
-        asm volatile(
-        "asr %[input_a], %[input_a], #3\n"
-        "asr %[input_b], %[input_b], #3\n"
-        "mul %[result], %[input_a], %[input_b]\n"
-        : [result] "+r" (a)
-        : [input_a] "r" (a), [input_b] "r" (b)
-        : "cc" // Condition code flags are affected by the add operation
-    );
-    return a;
-};
+bool fix14_test(std::stringstream& err){
+    fix14_t a = int_to_fix14(5);
+    fix14_t b = int_to_fix14(4);
 
-bool ARM_CODE assem_test(std::stringstream& err){
-    volatile fix14_t a = int_to_fix14(100);
-    volatile fix14_t b = int_to_fix14(3);
-    volatile fix14_t c;
+    if (a != 81920){
+        err << "int_to_fix14 failed: " << a << " != " << int_to_fix14(5) << std::endl;
+        return false;
+    }
 
-    volatile u32 time;
+    if (fix14_to_int(a) != 5){
+        err << "fix14_to_int failed: " << a << " != " << int_to_fix14(5) << std::endl;
+        return false;
+    }
 
-    startTimer();
-    c = fix14_mul(a, b);
-    time = stopTimer();
+    fix14_t c = fix14_mul(a, b);
+    if(c != int_to_fix14(20)){
+        err << "fix14_mul failed: " << a << "*" << b << "=" << c << std::endl;
+        return false;
+    }
 
-    err << "slow?: " << std::to_string(fix14_to_int(c))  << " raw: " << std::to_string(c) << " time: " << std::to_string(time) << std::endl;
+    a = int_to_fix14(3);
+    b = int_to_fix14(4);
+    fix14_t d = fix14_div(a, b);
+    if (d != 12288){
+        err << "fix14_div failed: " << a << "/" << b << "=" << d << std::endl;
+        err << "index: " << std::to_string(DIV_TABLE_14_32_INDEX(b)) << " shifted by: " << (14 + DIVISION_TABLE_14_32_PRECISION) << std::endl;
+        return false;
+    }
 
-    startTimer();
-    c = fix14_mul_fast(a, b);
-    time = stopTimer();
+    if(fix14_sqrt(b) != 32768){
+        err << "fix14_sqrt failed: " << b << "=" << fix14_sqrt(b) << std::endl;
+        return false;
+    }
 
-    err << "fast: " << std::to_string(fix14_to_int(c))  << " raw: " << std::to_string(c) << " time: " << std::to_string(time) << std::endl;
-
-    return false;
+    return true;
 }

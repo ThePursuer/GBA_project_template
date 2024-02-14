@@ -11,7 +11,9 @@
 #include <gba.h>
 
 #include "3Dgba/data_types.h"
-#include "3Dgba/math.h"
+#include "3Dgba/math/fix14.h"
+#include "3Dgba/math/fix7.h"
+#include "3Dgba/math/math.h"
 
 
 
@@ -51,6 +53,8 @@ inline bool operator==(const Matrix& lhs, const Matrix& rhs)
 
 // Dot product of two 3D vectors (ax, ay, az) and (bx, by, bz)
 #define DP33(ax,ay,az,bx,by,bz)     (ax * bx + ay * by + az * bz)
+
+void matrixLinearInterpolation(Matrix& a, const Matrix& b, fix14_t weight);
 
 #ifdef __cplusplus
 extern "C" {
