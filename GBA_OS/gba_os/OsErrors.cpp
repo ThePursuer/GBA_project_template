@@ -1,12 +1,13 @@
 #include "OsErrors.h"
+#include "gba_os/Clock/GbaClock.h"
 
 namespace gba_os::error {
 
 using namespace gba_os::console;
 
 void frame_duration_exceeded(void* data){
-	gba_os::chrono::gba_milliseconds* delta = static_cast<chrono::gba_milliseconds*>(data);
-    printf("Frame time exceeded: %i", delta->count());
+	chrono::gba_microseconds& delta = *static_cast<chrono::gba_microseconds*>(data);
+    printf("Total task time: %lld\n", delta.count());
 }
 
 void invalid_pallet(void* data){

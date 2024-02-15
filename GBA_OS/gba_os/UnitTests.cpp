@@ -8,11 +8,11 @@ namespace gba_os::test {
 std::vector<TestCase> testCases;
 
 // Buffer to capture test results
-std::ostringstream testBuffer;
+std::stringstream testBuffer;
 
 // Function to register a test case
-void RegisterTest(const std::string& name, std::function<bool(std::ostringstream&)> testFunc) {
-    testCases.push_back({name, testFunc, std::ostringstream()});
+void RegisterTest(const std::string& name, std::function<bool(std::stringstream&)> testFunc) {
+    testCases.push_back({name, testFunc, std::stringstream()});
 }
 
 // Function to run all registered test cases and capture results in the buffer

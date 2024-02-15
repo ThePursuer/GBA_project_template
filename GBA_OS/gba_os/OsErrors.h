@@ -2,11 +2,11 @@
 #define OS_ERRORS_H
 
 #include <cstdio>
+#include <string>
 
 #include <gba.h>
 
 #include "gba_os/Console.h"
-#include "gba_os/Clock/GbaClock.h"
 
 namespace gba_os::error {
 

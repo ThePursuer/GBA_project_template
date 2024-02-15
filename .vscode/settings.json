@@ -1,7 +1,7 @@
 {
     "terminal.integrated.profiles.windows": {
         "msys2": {
-            "path": "C:\\devkitPro\\msys2\\usr\\bin\\bash.exe"
+            "path": "C:\\devkitpro\\msys2\\usr\\bin\\bash.exe",
         }
     },
     "terminal.integrated.defaultProfile.windows": "msys2",
@@ -76,5 +76,9 @@
         "variant": "cpp"
     },
     "C_Cpp.default.cppStandard": "gnu++20",
-    "C_Cpp.default.cStandard": "gnu17"
+    "C_Cpp.default.cStandard": "gnu17",
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "C_Cpp.default.compilerPath": "C:\\devkitpro\\devkitARM\\bin\\arm-none-eabi-gcc.exe"
 }

@@ -10,11 +10,11 @@ def generate_magic_numbers(fixed_precision, largest_divisor, step, output_precis
         magic_numbers.append(magic_number)
     return magic_numbers
 
-def write_cpp_files(magic_numbers, signed, data_type, output_precision):
+def write_cpp_files(magic_numbers, signed, data_type, output_precision, step, precision):
     data_type_str = "int32_t" if data_type == 32 else "int16_t"
     if not signed:
         data_type_str = f"u{data_type_str}"
-    array_name = "division_table"
+    array_name = f"division_table_{precision}_{data_type}"
 
     # Write the source file
     with open(f"{array_name}.cpp", "w") as cpp_file:
@@ -33,8 +33,17 @@ def write_cpp_files(magic_numbers, signed, data_type, output_precision):
         guard_name = f"{array_name.upper()}_H"
         header_file.write(f"#ifndef {guard_name}\n#define {guard_name}\n\n")
         header_file.write(f"#include <cstdint>\n\n")
+
         if (output_precision != 0):
-            header_file.write(f"#define DIVISION_TABLE_PRECISION {output_precision}\n\n")
+            header_file.write(f"#define DIVISION_TABLE_{precision}_{data_type}_PRECISION {output_precision}\n")
+        header_file.write(f"#define DIVISION_TABLE_{precision}_{data_type}_STEP {step} // in powers of 2\n")
+        header_file.write(f"#define DATA_TYPE_{precision}_{data_type}_PRECISION_BITS {precision}\n")
+        if (step == 1):
+            header_file.write(f"#define DIV_TABLE_{precision}_{data_type}_INDEX(divisor) ((divisor) - 1)\n\n")
+        else:
+            header_file.write(f"#define DIV_TABLE_{precision}_{data_type}_INDEX(divisor) (((divisor) >> (DATA_TYPE_{precision}_{data_type}_PRECISION_BITS - DIVISION_TABLE_{precision}_{data_type}_STEP)) - 1)\n\n")
+
+
         header_file.write(f"extern {data_type_str} {array_name}[{len(magic_numbers)}];\n\n")
         header_file.write("#endif\n")
         header_file.flush()
@@ -68,7 +77,7 @@ def main():
         print(f"Magic number {magic_numbers[0]} is too large for 32 bit unsigned integer. Try again with different settings (lower output precision or larger step.). Exiting...")
         return 1
     
-    write_cpp_files(magic_numbers, args.signed, args.data_type, args.op)
+    write_cpp_files(magic_numbers, args.signed, args.data_type, args.op, args.step, args.fixed_precision)
 
 if __name__ == "__main__":
     main()

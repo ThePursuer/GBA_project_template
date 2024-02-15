@@ -5,7 +5,6 @@
 
 #include <maxmod.h>
 
-#include "gba_os/Clock/GbaClock.h"
 #include "gba_os/CoreDefs.h"
 #include "gba_os/Core.h"
 

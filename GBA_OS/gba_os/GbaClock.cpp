@@ -27,6 +27,7 @@ GbaClock::GbaClock() {
 
 IWRAM_CODE void GbaClock::irq_handler() {
     rollovers++;
+    REG_IF = IRQ_TIMER3;
 }
 
 } // chrono

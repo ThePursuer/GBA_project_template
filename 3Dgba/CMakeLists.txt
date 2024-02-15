@@ -5,9 +5,6 @@ project(3Dgba VERSION 0.1.0 LANGUAGES ASM CXX C)
 # Add the assembly files to the project
 set(
     ASM_FILES
-    asm/math/sdiv32.s
-    asm/math/udiv32.s
-
     asm/box/boxTranslate.s
 )
 
@@ -20,11 +17,11 @@ set(
 
     src/box.cpp
     src/rasterize.cpp
+    src/ui_overlay.cpp
 )
 
 # Create the library target
 add_library(3Dgba STATIC ${ASM_FILES} ${SRC_FILES})
-target_link_libraries(3Dgba PUBLIC gba_os)
 
 # Loop through ASM_FILES and set source file properties to "ASM"
 foreach(ASM_FILE ${ASM_FILES})

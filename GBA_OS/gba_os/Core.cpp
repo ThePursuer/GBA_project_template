@@ -1,13 +1,15 @@
 #include "gba_os/Core.h"
 #include "OsErrors.h"
-#include "stdio.h"
+
+#include "gba_os/Clock/GbaClock.h"
 
 
 namespace gba_os{
 
 IWRAM_DATA static video::FRAMERATE framerate_ = video::FRAMERATE60;
 IWRAM_DATA static volatile unsigned int frame_count = 0;
-IWRAM_DATA static std::vector<Task> tasks_ = {};
+IWRAM_DATA static std::array<Task, 40> tasks_ = {};
+IWRAM_DATA static volatile int task_count = 0;
 IWRAM_DATA static std::unordered_set<uint16_t> task_ids;
 IWRAM_DATA static std::vector<Task> vblank_tasks_ = {};
 IWRAM_DATA static std::unordered_set<uint16_t> vblank_task_ids;
@@ -15,18 +17,7 @@ IWRAM_DATA static chrono::gba_milliseconds frame_duration = chrono::gba_millisec
 
 
 void raise_software_error(std::string error){
-    // error will not be modified so const cast is safe here
     gba_os::error::error_state(gba_os::error::os_error::SFOTWARE_RUNTIME_ERROR, &error);
-}
-
-static constexpr void sort_tasks(std::vector<Task>& t_){
-    std::sort(
-        t_.begin(),
-        t_.end(),
-        [](Task a, Task b){ 
-            return (a.priority < b.priority);
-        }
-    );
 }
 
 void set_framerate(video::FRAMERATE framerate){
@@ -57,8 +48,10 @@ IWRAM_CODE static void vblank_os_callback(){
             break;
     }
 
-    for(auto task : vblank_tasks_)
-        task.f(task);
+    // for(auto task : vblank_tasks_)
+    //     task.f(task);
+        
+    REG_IF = IRQ_VBLANK;
 }
 
 IWRAM_CODE void waitNextFrame(){
@@ -68,8 +61,8 @@ IWRAM_CODE void waitNextFrame(){
         VBlankIntrWait();
         break;
     default:
-        while(frame_count == 0);
-        while(frame_count != 0);
+        while(frame_count == 0){};
+        while(frame_count != 0){};
         break;
     }
 }
@@ -80,17 +73,24 @@ void init_gba_os(){
 	irqSet(IRQ_VBLANK, &vblank_os_callback);
 }
 
+static std::string errmsg = std::string("Frame count not 0 at begining of frame!");
+
 IWRAM_CODE void run_gba_os(){
     auto clock = chrono::GbaClock::instance();
     chrono::GbaClock::time_point start;
-    chrono::gba_milliseconds delta;
+    chrono::gba_microseconds delta;
     waitNextFrame();
+    int i = 0;
     while(1){
+        if(frame_count != 0)
+            gba_os::error::error_state(gba_os::error::SFOTWARE_RUNTIME_ERROR, static_cast<void*>(&errmsg));
         start = clock.now();
-        for(auto task: tasks_){
-            task.f(task);
+        while(i < task_count){
+            tasks_[i].f(tasks_[i]);
+            i++;
         }
-        delta = std::chrono::duration_cast<chrono::gba_milliseconds>(clock.now() - start);
+        i = 0;
+        delta = std::chrono::duration_cast<chrono::gba_microseconds>(clock.now() - start);
         if (delta > frame_duration)
             gba_os::error::error_state(gba_os::error::FRAME_DURATION_EXCEEDED, static_cast<void*>(&delta));
         waitNextFrame();
@@ -103,25 +103,37 @@ int register_task(Task t){
     t.id = task_id_counter;
     task_ids.insert(task_id_counter);
     task_id_counter++;
-    tasks_.push_back(t);
-    sort_tasks(tasks_);
+    tasks_[task_count] = t;
+    task_count++;
+    std::sort(
+        tasks_.begin(),
+        tasks_.begin() + task_count,
+        [](Task a, Task b){
+            return (a.priority < b.priority);
+        }
+    );
     return t.id;
 }
 
 void unregister_task(int id){
     task_ids.erase(id);
-    std::erase_if(tasks_, [&id](Task t){return t.id == id;});
+    auto it = std::find_if(tasks_.begin(), tasks_.begin() + task_count, [&id](Task t){return t.id == id;});
+    if(it != tasks_.begin() + task_count){
+        std::rotate(it, it + 1, tasks_.begin() + task_count);
+        task_count--;
+    }
 }
 
 int register_vblank_interrupt_task(Task cb){
-    static uint32_t task_id = 0;
-    while(task_ids.contains(task_id)){ task_id = (task_id + 1) % UINT16_MAX; }
-    cb.id = task_id;
-    task_ids.insert(task_id);
-    task_id++;
-    vblank_tasks_.push_back(cb);
-    sort_tasks(vblank_tasks_);
-    return cb.id;
+    // static uint32_t task_id = 0;
+    // while(task_ids.contains(task_id)){ task_id = (task_id + 1) % UINT16_MAX; }
+    // cb.id = task_id;
+    // task_ids.insert(task_id);
+    // task_id++;
+    // vblank_tasks_.push_back(cb);
+    // sort_tasks(vblank_tasks_);
+    // return cb.id;
+    return 0;
 }
 
 void unregister_vblank_interrupt_task(int id){

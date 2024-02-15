@@ -15,6 +15,7 @@ set(GBA_OS_SRC
     gba_os/OsErrors.cpp
     gba_os/Screen.cpp
     gba_os/Tasks.cpp
+    gba_os/QuickTimer.cpp
 )
 
 set(GBA_OS_LINK_LIBS

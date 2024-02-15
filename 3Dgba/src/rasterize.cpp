@@ -8,7 +8,7 @@ IWRAM_DATA static std::array<uint16_t, MAX_DEPTH> triangle_base_indicies = {0}; 
 EWRAM_DATA ALIGN(16) std::array<transformed_face, 1000> transformed_faces;
 uint16_t face_count = 0;
 
-void sort_inplace(vertex_int32_u (&a)[3]){
+IWRAM_CODE ARM_CODE void sort_inplace(vertex_int32_u (&a)[3]){
     int32_t swap = a[0].i;
     if (a[0].i > a[1].i){
         a[0].i = a[1].i;
@@ -26,7 +26,7 @@ void sort_inplace(vertex_int32_u (&a)[3]){
     }
 }
 
-void add_transformed_face(const Triangle2Ds_t& triangle, const uint16_t depth, const uint8_t color){
+IWRAM_CODE ARM_CODE void add_transformed_face(const Triangle2Ds_t& triangle, const uint16_t depth, const uint8_t color){
     transformed_faces[face_count].color = color;
     transformed_faces[face_count].triangle = triangle;
     transformed_faces[face_count].next_index = triangle_base_indicies[depth];
@@ -34,7 +34,7 @@ void add_transformed_face(const Triangle2Ds_t& triangle, const uint16_t depth, c
     face_count++;
 }
 
-void fillBottomFlatTriangle(Vector2s_t (&tri)[3], void* fb)
+IWRAM_CODE ARM_CODE void fillBottomFlatTriangle(Vector2s_t (&tri)[3], void* fb)
 {
     fix7_t invslope1 = fix7_div((tri[1].x - tri[0].x), (tri[1].y - tri[0].y));
     fix7_t invslope2 = fix7_div((tri[2].x - tri[0].x), (tri[2].y - tri[0].y));
@@ -52,7 +52,7 @@ void fillBottomFlatTriangle(Vector2s_t (&tri)[3], void* fb)
     }
 }
 
-void fillTopFlatTriangle(Vector2s_t (&tri)[3], void* fb)
+IWRAM_CODE ARM_CODE void fillTopFlatTriangle(Vector2s_t (&tri)[3], void* fb)
 {
     fix7_t invslope1 = fix7_div((tri[2].x - tri[0].x), (tri[2].y - tri[0].y));
     fix7_t invslope2 = fix7_div((tri[2].x - tri[1].x), (tri[2].y - tri[1].y));
@@ -70,7 +70,7 @@ void fillTopFlatTriangle(Vector2s_t (&tri)[3], void* fb)
     }
 }
 
-void drawTriangle(Vector2s_t (&tri)[3], void* fb)
+IWRAM_CODE ARM_CODE void drawTriangle(Vector2s_t (&tri)[3], void* fb)
 {
     /* at first sort the three vertices by y-coordinate ascending so tri[0] is the topmost vertice */
     sort_inplace(*reinterpret_cast<vertex_int32_u(*)[3]>(&tri));

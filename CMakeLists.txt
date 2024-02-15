@@ -14,8 +14,8 @@ set(CMAKE_CXX_STANDARD 20)
 # dkp_add_embedded_binary_library(meshes cube.obj cube.mtl)
 
 # Set WITH_UNIT_TESTS option for GBA_OS subproject
-set(WITH_UNIT_TESTS ON CACHE BOOL "Enable unit tests for GBA_OS" FORCE)
+# set(WITH_UNIT_TESTS ON CACHE BOOL "Enable unit tests for GBA_OS" FORCE)
 add_subdirectory(GBA_OS)
 # add_subdirectory(ECS)
-# add_subdirectory(src)
+add_subdirectory(src)
 add_subdirectory(3Dgba)

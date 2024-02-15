@@ -17,12 +17,12 @@ namespace gba_os::test {
 // Struct to represent a single test case
 struct TestCase {
     std::string name;
-    std::function<bool(std::ostringstream&)> testFunc;
-    std::ostringstream err;
+    std::function<bool(std::stringstream&)> testFunc;
+    std::stringstream err;
 };
 
 // Function to register a test case
-void RegisterTest(const std::string& name, std::function<bool(std::ostringstream&)> testFunc);
+void RegisterTest(const std::string& name, std::function<bool(std::stringstream&)> testFunc);
 
 // Function to run all registered test cases and capture results in the buffer
 void RunTests();

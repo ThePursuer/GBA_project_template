@@ -1,7 +1,6 @@
 #include "gba_os/MaxMod.h"
 
 static bool musicMuted = false;
-static gba_os::chrono::GbaClock& clock_ = gba_os::chrono::GbaClock::instance();
 
 namespace gba_os::tasks::vblank {
 
