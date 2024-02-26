@@ -8,13 +8,13 @@
 #include "gba_os/CoreDefs.h"
 #include "gba_os/Core.h"
 
-namespace gba_os::tasks::vblank {
+namespace Gba_os::tasks::vblank {
 
 void update_max_mod();
 
 } // vblank
 
-namespace gba_os::audio {
+namespace Gba_os::audio {
     
 void mute();
 void unMute();

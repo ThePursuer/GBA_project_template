@@ -2,7 +2,7 @@
 
 static bool musicMuted = false;
 
-namespace gba_os::tasks::vblank {
+namespace Gba_os::tasks::vblank {
 
 void update_max_mod(){
     mmVBlank();
@@ -11,11 +11,11 @@ void update_max_mod(){
 
 } // vblank
 
-namespace gba_os::tasks{
+namespace Gba_os::tasks{
 
 void fade_out_task(Task& task){
     if(musicMuted){
-        gba_os::unregister_vblank_interrupt_task(task.id); // todo: test if this breaks
+        Gba_os::unregister_vblank_interrupt_task(task.id); // todo: test if this breaks
         return;
     }
     // fade_out_task_data& data = *static_cast<fade_out_task_data*>(task.data);
@@ -35,7 +35,7 @@ void fade_out_task(Task& task){
 
 } // tasks
 
-namespace gba_os::audio {
+namespace Gba_os::audio {
 
     
 void mute(){

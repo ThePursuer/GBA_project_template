@@ -11,11 +11,11 @@ include($ENV{DEVKITPRO}/cmake/GBA.cmake)
 set(GBA_OS_SRC
     gba_os/Console.cpp
     gba_os/Core.cpp
-    gba_os/GbaClock.cpp
     gba_os/OsErrors.cpp
     gba_os/Screen.cpp
     gba_os/Tasks.cpp
     gba_os/QuickTimer.cpp
+    gba_os/Clock.cpp
 )
 
 set(GBA_OS_LINK_LIBS

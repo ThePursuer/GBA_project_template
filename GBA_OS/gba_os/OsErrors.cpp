@@ -1,13 +1,13 @@
 #include "OsErrors.h"
-#include "gba_os/Clock/GbaClock.h"
 
-namespace gba_os::error {
+namespace Gba_os::error {
 
-using namespace gba_os::console;
+using namespace Gba_os::console;
+using namespace Gba_os::screen;
 
 void frame_duration_exceeded(void* data){
-	chrono::gba_microseconds& delta = *static_cast<chrono::gba_microseconds*>(data);
-    printf("Total task time: %lld\n", delta.count());
+	auto& delta = *static_cast<std::chrono::microseconds*>(data);
+    printf("Total task time: %i\n", delta.count());
 }
 
 void invalid_pallet(void* data){
@@ -31,6 +31,8 @@ void error_state(os_error err, void* data){
 					0, 		// font size
 					15		// 16 color palette
 	);
+
+    
 
 	// set the screen colors, color 0 is the background color
 	// the foreground color is index 1 of the selected 16 color palette
@@ -58,7 +60,14 @@ void error_state(os_error err, void* data){
 	default:
 		break;
 	}
-    while(1);
+    // while(1){}; // halt execution
+    while(
+        !(keysDown() & KEY_A)
+    ){
+		scanKeys();
+    };
+
+    Gba_os::screen::restore_user_mode();
 }
 
 }

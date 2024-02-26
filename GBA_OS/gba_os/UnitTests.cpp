@@ -2,7 +2,7 @@
 
 #include "gba_os/Console.h"
 
-namespace gba_os::test {
+namespace Gba_os::test {
 
 // Global vector to store all registered test cases
 std::vector<TestCase> testCases;
@@ -71,7 +71,7 @@ int CountLines() {
     return lineCount;
 }
 
-void test_results_task(gba_os::Task& t){
+void test_results_task(Gba_os::Task& t){
     scanKeys();
     u16 buttons = keysDown();
     static int display_line = 0;

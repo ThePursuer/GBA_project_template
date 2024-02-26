@@ -4,7 +4,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace gba_os{
+namespace Gba_os{
 
 namespace video{
 

@@ -3,12 +3,15 @@
 
 #include <cstdio>
 #include <string>
+#include <functional>
 
 #include <gba.h>
 
 #include "gba_os/Console.h"
+#include "gba_os/Screen.h"
+#include "gba_os/Clock.h"
 
-namespace gba_os::error {
+namespace Gba_os::error {
 
 enum os_error {
     FRAME_DURATION_EXCEEDED,
@@ -16,7 +19,7 @@ enum os_error {
     SFOTWARE_RUNTIME_ERROR
 };
 
-void error_state(os_error err, void* data);
+void error_state(os_error err, void* data); // sets the screen mode to 0 and calls the error handler, restores the user screen mode after
 
 }
 

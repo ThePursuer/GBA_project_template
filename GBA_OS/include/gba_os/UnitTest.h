@@ -12,7 +12,7 @@
 
 #include <gba_os/CoreDefs.h>
 
-namespace gba_os::test {
+namespace Gba_os::test {
 
 // Struct to represent a single test case
 struct TestCase {
@@ -30,7 +30,7 @@ void RunTests();
 // Function to display up to 20 lines from the buffer starting from a given line
 void DisplayTestResults(int startLine);
 
-void test_results_task(gba_os::Task& t);
+void test_results_task(Gba_os::Task& t);
 
 } // namespace gba_os::test
 

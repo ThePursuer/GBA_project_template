@@ -6,7 +6,7 @@
 #include <gba_console.h>
 #include <gba_video.h>
 
-namespace gba_os::console {
+namespace Gba_os::console {
 
 // Function to clear the console
 void clearConsole();

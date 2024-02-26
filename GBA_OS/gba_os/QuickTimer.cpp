@@ -13,7 +13,7 @@ void startTimer() {
 volatile u32 stopTimer() {
     // Disable the timer
     REG_TM0CNT_H &= ~TIMER_START;
-    
+
     // Return the value of the timer
     return (REG_TM0CNT_L - 107) * 59.595 ; // time it takes to start/stop the timer
 }

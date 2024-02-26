@@ -1,6 +1,6 @@
 #include "gba_os/Console.h"
 
-namespace gba_os::console {
+namespace Gba_os::console {
 
 void clearConsole() {
     printf("\x1b[2J"); // Clear the screen

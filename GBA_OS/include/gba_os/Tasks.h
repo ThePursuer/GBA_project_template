@@ -5,10 +5,16 @@
 
 #include "gba_os/CoreDefs.h"
 
-namespace gba_os::tasks{
+namespace Gba_os::tasks{
 
-IWRAM_CODE void update_screen_mode_4_task(Task& task);
+void update_screen_mode_4_task(Task& task);
 
-} // gba_os
+struct Mode4Data {
+    uint8_t** screen_buffer;
+};
+
+void switch_mode4_buffers(Task& data);
+
+} // gba_os::tasks
 
 #endif // TASKS_3DGBA_H

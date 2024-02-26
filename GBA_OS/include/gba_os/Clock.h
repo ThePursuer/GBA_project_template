@@ -5,18 +5,11 @@
 
 #include "gba_timers.h"
 #include "gba_interrupt.h"
-//todo: Fix a bug where time_point + duration doesnst work 
 
-namespace gba_os {
-namespace chrono {
-
-// Equvalents of std::chrono::<resolution>, required because std::chrono uses 64bit integers and we don't have those. 
-typedef std::chrono::nanoseconds gba_nanoseconds;
-typedef std::chrono::microseconds gba_microseconds;
-typedef std::chrono::milliseconds gba_milliseconds;
-typedef std::chrono::seconds gba_seconds;
+namespace Gba_os::Clock {
 
 class GbaClock {
+// todo: implement time loading
 public:
     typedef std::chrono::nanoseconds duration;
     typedef duration::rep rep;
@@ -34,7 +27,6 @@ private:
     static void irq_handler();
 };
 
-} // chrono
-} // gba_os
+} // gba_os::clock
 
 #endif // GBA_CLOCK
