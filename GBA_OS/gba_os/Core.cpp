@@ -2,6 +2,7 @@
 
 #include "OsErrors.h"
 #include "gba_os/Clock.h"
+#include "interrupt_manager.h"
 
 namespace Gba_os{
 
@@ -20,9 +21,9 @@ IWRAM_DATA static std::unordered_set<uint16_t> vblank_task_ids;
 
 constexpr unsigned int cycles_per_v_blank = 279238;
 // nanosecond precision helps us avoid conversions between units later
-EWRAM_DATA static const std::chrono::nanoseconds vblank_interval = std::chrono::microseconds(16743);
-EWRAM_DATA static std::chrono::nanoseconds frame_duration = std::chrono::microseconds(16743);
-IWRAM_DATA static GbaClock& clock = GbaClock::instance();
+EWRAM_DATA static const std::chrono::microseconds vblank_interval = std::chrono::microseconds(16743);
+EWRAM_DATA static std::chrono::microseconds frame_duration = vblank_interval;
+IWRAM_DATA static GbaClock& osclock = GbaClock::instance();
 
 IWRAM_DATA static bool alert_called = false;
 
@@ -57,8 +58,6 @@ IWRAM_CODE static void vblank_os_callback(){
     for(int i = 0; i < vblank_task_count; i++){
         vblank_tasks_[i].f(vblank_tasks_[i]);
     }
-        
-    REG_IF = IRQ_VBLANK;
 }
 
 IWRAM_CODE void waitNextFrame(){
@@ -75,7 +74,7 @@ IWRAM_CODE void waitNextFrame(){
 }
 
 void init_gba_os(){
-    irqInit();
+    InterruptManager::instance();
     irqEnable(IRQ_VBLANK);
     irqEnable(IRQ_KEYPAD);
 	irqSet(IRQ_VBLANK, &vblank_os_callback);
@@ -83,7 +82,7 @@ void init_gba_os(){
 
 static std::string errmsg = "Frame counter not 0 at start of frame!";
 IWRAM_CODE ARM_CODE void tick(){
-    auto start = clock.now();
+    auto start = osclock.now();
 
     if(frame_count != 0)
         Gba_os::error::error_state(Gba_os::error::SFOTWARE_RUNTIME_ERROR, static_cast<void*>(&errmsg));
@@ -91,7 +90,7 @@ IWRAM_CODE ARM_CODE void tick(){
     for(int i = 0; i < task_count; i++)
         tasks_[i].f(tasks_[i]);
 
-    auto delta = std::chrono::duration_cast<std::chrono::microseconds>(clock.now() - start);
+    auto delta = std::chrono::duration_cast<std::chrono::microseconds>(osclock.now() - start);
     if (delta > frame_duration && !alert_called)
         Gba_os::error::error_state(Gba_os::error::FRAME_DURATION_EXCEEDED, static_cast<void*>(&delta));
     waitNextFrame();

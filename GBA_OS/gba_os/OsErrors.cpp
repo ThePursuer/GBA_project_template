@@ -7,6 +7,7 @@ using namespace Gba_os::screen;
 
 void frame_duration_exceeded(void* data){
 	auto& delta = *static_cast<std::chrono::microseconds*>(data);
+    printf("Frame duration exceeded!\n");
     printf("Total task time: %i\n", delta.count());
 }
 
@@ -31,8 +32,6 @@ void error_state(os_error err, void* data){
 					0, 		// font size
 					15		// 16 color palette
 	);
-
-    
 
 	// set the screen colors, color 0 is the background color
 	// the foreground color is index 1 of the selected 16 color palette

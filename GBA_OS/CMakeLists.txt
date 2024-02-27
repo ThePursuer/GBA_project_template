@@ -16,6 +16,7 @@ set(GBA_OS_SRC
     gba_os/Tasks.cpp
     gba_os/QuickTimer.cpp
     gba_os/Clock.cpp
+    gba_os/SimpleOutputStream.cpp
 )
 
 set(GBA_OS_LINK_LIBS
@@ -52,3 +53,8 @@ install(TARGETS gba_os
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
     DESTINATION include
 )
+
+option(WITH_UNIT_TESTS "Build gba_os unit_tests" OFF)
+if(WITH_UNIT_TESTS)
+    add_subdirectory(unit_tests)
+endif()

@@ -2,34 +2,56 @@
 
 #include "gba_os/Console.h"
 
+#include <cstring>
+
+
 namespace Gba_os::test {
 
-// Global vector to store all registered test cases
-std::vector<TestCase> testCases;
+using namespace Gba_os::console;
+
+// Struct to represent a single test case
+struct TestCase {
+    std::string name;
+    std::function<bool(Gba_os::console::SimpleOutputStream&)> testFunc;
+};
 
 // Buffer to capture test results
-std::stringstream testBuffer;
+EWRAM_DATA char buffer[51200];
+SimpleOutputStream testBuffer(buffer, sizeof(buffer));
+
+// Global array to store all registered test cases
+EWRAM_DATA std::array<TestCase, 100> testCases;
+int testCount = 0;
+
 
 // Function to register a test case
-void RegisterTest(const std::string& name, std::function<bool(std::stringstream&)> testFunc) {
-    testCases.push_back({name, testFunc, std::stringstream()});
+void RegisterTest(const std::string& name, std::function<bool(SimpleOutputStream&)> testFunc) {
+    testCases[testCount].name = name;
+    testCases[testCount].testFunc = testFunc;
+    testCount++;
 }
 
 // Function to run all registered test cases and capture results in the buffer
 void RunTests() {
     int passedCount = 0;
-    int totalCount = testCases.size();
+    int totalCount = testCount;
 
-    for (TestCase& testCase : testCases) {
-        testBuffer << testCase.name;
+    char buffer[512];
+    SimpleOutputStream err(buffer, sizeof(buffer));
 
-        bool result = testCase.testFunc(testCase.err);
+    for (auto testCase = testCases.begin(); testCase != testCases.begin() + testCount; ++testCase){
+        testBuffer << testCase->name;
+
+        // reset the buffer
+        err.clear();
+
+        bool result = testCase->testFunc(err);
         if (result) {
             testBuffer << "[PASS]" << std::endl;
             passedCount++;
         } else {
             testBuffer << "[FAIL]" << std::endl;
-            testBuffer << testCase.err.str() << std::endl;
+            testBuffer << err.str() << std::endl;
         }
     }
 

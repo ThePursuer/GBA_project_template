@@ -9,7 +9,7 @@
 namespace Gba_os::Clock {
 
 class GbaClock {
-// todo: implement time loading
+// todo: implement time loading from save file
 public:
     typedef std::chrono::nanoseconds duration;
     typedef duration::rep rep;
@@ -19,12 +19,13 @@ public:
 
     static GbaClock& instance();
 
+    static void irq_handler();
+
     std::chrono::time_point<GbaClock> now() noexcept;
 private:
 
     GbaClock();
 
-    static void irq_handler();
 };
 
 } // gba_os::clock
