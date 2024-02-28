@@ -32,7 +32,7 @@ void RegisterTest(const std::string& name, std::function<bool(SimpleOutputStream
 }
 
 // Function to run all registered test cases and capture results in the buffer
-void RunTests() {
+std::vector<std::string> RunTests() {
     int passedCount = 0;
     int totalCount = testCount;
 
@@ -56,10 +56,7 @@ void RunTests() {
     }
 
     testBuffer << std::endl << passedCount << "/" << totalCount << " tests passed." << std::endl;
-}
-
-// Function to display up to 20 lines from the buffer starting from a given line
-void DisplayTestResults(int startLine) {
+    
     // Split the test results into lines
     std::istringstream iss(testBuffer.str());
     std::vector<std::string> lines;
@@ -67,7 +64,11 @@ void DisplayTestResults(int startLine) {
     while (std::getline(iss, line)) {
         lines.push_back(line);
     }
+    return lines;
+}
 
+// Function to display up to 20 lines from the buffer starting from a given line
+void DisplayTestResults(int startLine, std::vector<std::string>& lines) {
     // Calculate the end line
     int endLine = startLine + 20;
     if (endLine > lines.size()) {
@@ -115,8 +116,10 @@ void test_results_task(Gba_os::Task& t){
         }
         rerender = true;
     }
-    if(rerender)
-        DisplayTestResults(display_line);
+    if(rerender){
+        std::vector<std::string>& lines = *(std::vector<std::string>*)t.data;
+        DisplayTestResults(display_line, lines);
+    }
     rerender = false;
 }
 

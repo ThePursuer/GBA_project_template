@@ -10,7 +10,6 @@
 
 namespace Gba_os::console {
 
-
 /**
  * @name SimpleOutputStream
  * @brief A simple output stream class that can be used to build strings
@@ -37,6 +36,8 @@ public:
     SimpleOutputStream& operator<<(unsigned short value){ return *this << (unsigned long long)value; }
     SimpleOutputStream& operator<<(int value){ return *this << (long long)value; }
     SimpleOutputStream& operator<<(unsigned int value){ return *this << (unsigned long long)value; }
+    SimpleOutputStream& operator<<(long value){ return *this << (long long)value; }
+    SimpleOutputStream& operator<<(unsigned long value){ return *this << (unsigned long long)value; }
 
     SimpleOutputStream& operator<<(double value);
     SimpleOutputStream& operator<<(float value){ return *this << (double)value; }

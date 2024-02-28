@@ -19,10 +19,10 @@ namespace Gba_os::test {
 void RegisterTest(const std::string& name, std::function<bool(Gba_os::console::SimpleOutputStream&)> testFunc);
 
 // Function to run all registered test cases and capture results in the buffer
-void RunTests();
+std::vector<std::string> RunTests();
 
 // Function to display up to 20 lines from the buffer starting from a given line
-void DisplayTestResults(int startLine);
+void DisplayTestResults(int startLine, std::vector<std::string>& lines);
 
 void test_results_task(Gba_os::Task& t);
 
