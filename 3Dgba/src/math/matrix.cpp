@@ -1,12 +1,6 @@
 #include "3Dgba/math/matrix.h"
 
-
-#define MAX_MATRICES 8
-IWRAM_DATA Matrix gMatrixStack[MAX_MATRICES];
-IWRAM_DATA Matrix* gMatrixPtr = gMatrixStack;
-Matrix& get_matrix_ptr() { return *gMatrixPtr; }
-
-IWRAM_DATA Vector3i_t gCameraViewPos;
+IWRAM_DATA Vector3<fix14_t> gCameraViewPos;
 
 __always_inline fix14_t interpolate_slow(fix14_t a, fix14_t b, fix14_t weight){
     return a + fix14_mul((b - a), weight);
@@ -75,7 +69,7 @@ IWRAM_CODE ARM_CODE void matrixTranslateRel_c(Matrix&m, int32_t x, int32_t y, in
     m.e23 += DP33(m.e20, m.e21, m.e22, x, y, z);
 }
 
-IWRAM_CODE ARM_CODE void matrixTranslateAbs_c(Matrix& m, Vector3i_t& cameraPos, int32_t x, int32_t y, int32_t z)
+IWRAM_CODE ARM_CODE void matrixTranslateAbs_c(Matrix& m,  Vector3<fix14_t>& cameraPos, int32_t x, int32_t y, int32_t z)
 {
     x -= cameraPos.x;
     y -= cameraPos.y;

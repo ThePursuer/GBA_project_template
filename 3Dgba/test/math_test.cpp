@@ -1,13 +1,17 @@
 #include <3Dgba/math/fix7.h>
 #include <3Dgba/math/fix14.h>
+#include <3Dgba/data_types.h>
 
 #include <iostream>
 #include <sstream>
 #include <string>
 
 #include <gba_os/QuickTimer.h>
+#include <gba_os/SimpleOutputStream.h>
 
-bool fix7_test(std::stringstream& err){
+using namespace Gba_os::console;
+
+bool fix7_test(SimpleOutputStream& err){
     fix7_t a = int_to_fix7(5);
     fix7_t b = int_to_fix7(4);
 
@@ -49,7 +53,7 @@ bool fix7_test(std::stringstream& err){
     return true;
 }
 
-bool fix14_test(std::stringstream& err){
+bool fix14_test(SimpleOutputStream& err){
     fix14_t a = int_to_fix14(5);
     fix14_t b = int_to_fix14(4);
 
@@ -84,4 +88,109 @@ bool fix14_test(std::stringstream& err){
     }
 
     return true;
+}
+
+bool Vector2_test(SimpleOutputStream& err){
+    Vector2<fix14_t> a = { int_to_fix14(5), int_to_fix14(4) };
+    Vector2<fix14_t> b = { int_to_fix14(3), int_to_fix14(4) };
+
+    Vector2<fix14_t> c = a + b;
+
+    if (c.x != int_to_fix14(8) || c.y != int_to_fix14(8)){
+        err << "Vector2 addition failed: " << c.x << ", " << c.y << " != " << int_to_fix14(8) << ", " << int_to_fix14(8) << std::endl;
+        return false;
+    }
+
+    c = a - b;
+
+    if (c.x != int_to_fix14(2) || c.y != int_to_fix14(0)){
+        err << "Vector2 subtraction failed: " << c.x << ", " << c.y << " != " << int_to_fix14(2) << ", " << int_to_fix14(0) << std::endl;
+        return false;
+    }
+
+    if(a == b){
+        err << "Vector2 equality failed: " << a.x << ", " << a.y << " == " << b.x << ", " << b.y << std::endl;
+        return false;
+    }
+
+    if(!(a == a)){
+        err << "Vector2 equality failed: " << a.x << ", " << a.y << " != " << a.x << ", " << a.y << std::endl;
+        return false;
+    }
+
+    if(a != a){
+        err << "Vector2 inequality failed: " << a.x << ", " << a.y << " != " << a.x << ", " << a.y << std::endl;
+        return false;
+    }
+
+    if(!(a != b)){
+        err << "Vector2 inequality failed: " << a.x << ", " << a.y << " == " << b.x << ", " << b.y << std::endl;
+        return false;
+    }
+
+    // Test comparison on same y axis
+    if (a < b){
+        err << "Vector2 less than failed: " << a.x << ", " << a.y << " < " << b.x << ", " << b.y << std::endl;
+        return false;
+    }
+
+    if(a < a){
+        err << "Vector2 less than failed: " << a.x << ", " << a.y << " < " << a.x << ", " << a.y << std::endl;
+        return false;
+    }
+
+    if (!(a > b)){
+        err << "Vector2 greater than failed: " << a.x << ", " << a.y << " > " << b.x << ", " << b.y << std::endl;
+        return false;
+    }
+
+    if(a > a){
+        err << "Vector2 greater than failed: " << b.x << ", " << b.y << " < " << a.x << ", " << a.y << std::endl;
+        return false;
+    }
+
+    if (a <= b){
+        err << "Vector2 less than or equal failed: " << a.x << ", " << a.y << " <= " << b.x << ", " << b.y << std::endl;
+        return false;
+    }
+
+    if(!(a <= a)){
+        err << "Vector2 less than or equal failed: " << a.x << ", " << a.y << " <= " << a.x << ", " << a.y << std::endl;
+        return false;
+    }
+
+    if (!(a >= b)){
+        err << "Vector2 greater than or equal failed: " << a.x << ", " << a.y << " >= " << b.x << ", " << b.y << std::endl;
+        return false;
+    }
+
+    if(!(a >= a)){
+        err << "Vector2 greater than or equal failed: " << b.x << ", " << b.y << " >= " << a.x << ", " << a.y << std::endl;
+        return false;
+    }
+
+    // test comparisons on different y axis
+    
+    a = { int_to_fix14(5), int_to_fix14(4) };
+    b = { int_to_fix14(3), int_to_fix14(6) };
+
+    if (!(a < b)){
+        err << "Vector2 less than failed: " << a.x << ", " << a.y << " < " << b.x << ", " << b.y << std::endl;
+        return false;
+    }
+
+    if (a > b){
+        err << "Vector2 greater than failed: " << a.x << ", " << a.y << " > " << b.x << ", " << b.y << std::endl;
+        return false;
+    }
+
+    if (!(a <= b)){
+        err << "Vector2 less than or equal failed: " << a.x << ", " << a.y << " <= " << b.x << ", " << b.y << std::endl;
+        return false;
+    }
+
+    if (a >= b){
+        err << "Vector2 greater than or equal failed: " << a.x << ", " << a.y << " >= " << b.x << ", " << b.y << std::endl;
+        return false;
+    }
 }

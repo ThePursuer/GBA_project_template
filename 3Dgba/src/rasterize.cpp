@@ -2,122 +2,115 @@
 
 namespace gba_3D {
 
-constexpr int MAX_DEPTH = 100;
-IWRAM_DATA static std::array<uint16_t, MAX_DEPTH> triangle_base_indicies = {0}; // holds the index of the next triangle at depth
-
-EWRAM_DATA ALIGN(16) std::array<transformed_face, 1000> transformed_faces;
-uint16_t face_count = 0;
-
-IWRAM_CODE ARM_CODE void sort_inplace(vertex_int32_u (&a)[3]){
-    int32_t swap = a[0].i;
-    if (a[0].i > a[1].i){
-        a[0].i = a[1].i;
-        a[1].i = swap;
+IWRAM_CODE ARM_CODE inline void sort_inplace(Triangle<Vector2<fix14_t>> &arr){
+    uint64_t (&a)[3] = *reinterpret_cast<uint64_t(*)[3]>(&arr.verticies);
+    uint64_t swap = a[0];
+    if (a[0] > a[1]){
+        a[0]= a[1];
+        a[1]= swap;
     }
-    if (a[0].i > a[2].i){
-        swap = a[0].i;
-        a[0].i = a[2].i;
-        a[2].i = swap;
+    if (a[0] > a[2]){
+        swap = a[0];
+        a[0] = a[2];
+        a[2] = swap;
     }
-    if (a[1].i > a[2].i){
-        swap = a[1].i;
-        a[1].i = a[2].i;
-        a[2].i = swap;
+    if (a[1] > a[2]){
+        swap = a[1];
+        a[1] = a[2];
+        a[2] = swap;
     }
 }
 
-IWRAM_CODE ARM_CODE void add_transformed_face(const Triangle2Ds_t& triangle, const uint16_t depth, const uint8_t color){
-    transformed_faces[face_count].color = color;
-    transformed_faces[face_count].triangle = triangle;
-    transformed_faces[face_count].next_index = triangle_base_indicies[depth];
-    triangle_base_indicies[depth] = face_count;
-    face_count++;
-}
+static uint16_t internal_color = 0x14;
 
-IWRAM_CODE ARM_CODE void fillBottomFlatTriangle(Vector2s_t (&tri)[3], void* fb)
-{
-    fix7_t invslope1 = fix7_div((tri[1].x - tri[0].x), (tri[1].y - tri[0].y));
-    fix7_t invslope2 = fix7_div((tri[2].x - tri[0].x), (tri[2].y - tri[0].y));
+inline IWRAM_CODE ARM_CODE void drawLines(uint8_t* fb, uint8_t*& starting_line, fix14_t& lx, fix14_t& rx, const fix14_t leftDx, const fix14_t rightDx, int height, uint8_t temp_color){
+    // while(starting_line > fb + (240 * 160) && height--){
+    //     lx -= leftDx;
+    //     rx -= rightDx;
+    //     starting_line -= 240;
+    // }
+    while(height--){ //&& starting_line >= fb){
+        uint8_t* dest = starting_line + fix14_to_int(lx);
+        int width = fix14_to_int(rx - lx);
 
-    fix7_t curx1 = tri[0].x;
-    fix7_t curx2 = tri[0].x;
-
-    for (int scanlineY = fix7_to_int_rounded(tri[0].y); scanlineY <= fix7_to_int_rounded(tri[1].y); scanlineY++)
-    {
-        for (int i = fix7_to_int_rounded(curx1); i <= fix7_to_int_rounded(curx2); i++){
-            ((uint8_t*)(fb))[scanlineY * 240 + (int)i] = 0x14;
+        // align to 16 bit boundary
+        if (intptr_t(dest) & 1) {
+            dest--;
+            *(uint16_t*)dest = *dest | (internal_color << 8);
+            dest += 2;
+            width--;
         }
-        curx1 += invslope1;
-        curx2 += invslope2;
-    }
-}
 
-IWRAM_CODE ARM_CODE void fillTopFlatTriangle(Vector2s_t (&tri)[3], void* fb)
-{
-    fix7_t invslope1 = fix7_div((tri[2].x - tri[0].x), (tri[2].y - tri[0].y));
-    fix7_t invslope2 = fix7_div((tri[2].x - tri[1].x), (tri[2].y - tri[1].y));
-
-    fix7_t curx1 = tri[2].x;
-    fix7_t curx2 = tri[2].x;
-
-    for (int scanlineY = fix7_to_int_rounded(tri[2].y); scanlineY > fix7_to_int_rounded(tri[0].y); scanlineY--)
-    {
-        for (int i = fix7_to_int_rounded(curx1); i <= fix7_to_int_rounded(curx2); i++){
-            ((uint8_t*)(fb))[scanlineY * 240 + (int)i] = 0x14;
+        switch (width & 3)
+        {
+        case 3:
+            // fallthrough to case 1
+        case 1:
+            *(uint16_t*)(dest + width - 1) = (temp_color) | (dest[width] << 8);
+            width--;
+            break;
+        case 2:
+            *(uint16_t*)dest = internal_color;
+            dest+=2;
+            width--;
+            break;
+        default:
+            break;
         }
-        curx1 -= invslope1;
-        curx2 -= invslope2;
+
+        width >>= 1;
+        if (width > 0)
+            // memset16(dest, internal_color, width);
+            DMA3COPY(&internal_color, (void*)dest, (DMA_IMMEDIATE | DMA16 | DMA_SRC_FIXED | DMA_DST_INC | width));
+
+        lx -= leftDx;
+        rx -= rightDx;
+        starting_line -= 240;
     }
 }
 
-IWRAM_CODE ARM_CODE void drawTriangle(Vector2s_t (&tri)[3], void* fb)
+void drawTriangle(uint8_t* fb, Triangle<Vector2<fix14_t>>& tri, uint8_t color)
 {
-    /* at first sort the three vertices by y-coordinate ascending so tri[0] is the topmost vertice */
-    sort_inplace(*reinterpret_cast<vertex_int32_u(*)[3]>(&tri));
+    // int top_vertex = get_top_vertex(tri);
+    tri.sort();
+    Vector2<fix14_t>& a = tri.verticies[0];
+    Vector2<fix14_t>& b = tri.verticies[1];
+    Vector2<fix14_t>& c = tri.verticies[2];
 
     /* here we know that tri[0].y <= tri[1].y <= tri[2].y */
-    /* check for trivial case of bottom-flat triangle */
-    if (tri[1].y == tri[2].y)
-    {
-        fillBottomFlatTriangle(tri, fb);
+    /* aka vertex A <= B <= C */
+    fix14_t CAh = 0, CBh = 0;
+    CAh = c.y - a.y;
+    CBh = c.y - b.y;
+
+    fix14_t CAdx = fix14_div(c.x - a.x, CAh);
+    fix14_t CBdx = fix14_div(c.x - b.x, CBh);
+    fix14_t BAdx = fix14_div(b.x - a.x, b.y - a.y);
+
+    uint8_t* line_ptr = fb + (240 * fix14_to_int(c.y));
+    internal_color = color | color << 8;
+
+    fix14_t lx, rx;
+    if(CBh == 0){
+        lx = b.x;
+        rx = c.x;
+        drawLines(fb, line_ptr, lx, rx, BAdx, CAdx, fix14_to_int(CAh - CBh), color);
+        return;
     }
-    /* check for trivial case of top-flat triangle */
-    else if (tri[0].y == tri[1].y)
-    {
-        fillTopFlatTriangle(tri, fb);
+    else {
+        lx = c.x;
+        rx = c.x;
     }
-    else
-    {
-        /* general case - split the triangle in a topflat and bottom-flat one */
-        Vector2s_t v4 = {
-            tri[0].x + fix7_mul(fix7_div((tri[1].y - tri[0].y), (tri[2].y - tri[0].y)), (tri[2].x - tri[0].x)), 
-            tri[1].y
-        };
-
-        Vector2s_t tri2[3] = {tri[0], v4, tri[1]};
-        sort_inplace(*reinterpret_cast<vertex_int32_u(*)[3]>(&tri2));
-        fillBottomFlatTriangle(tri2, fb);
-        Vector2s_t tri3[3] = {v4, tri[1], tri[2]};
-        sort_inplace(*reinterpret_cast<vertex_int32_u(*)[3]>(&tri3));
-        fillTopFlatTriangle(tri3, fb);
+    if (CBdx > CAdx){
+        // weierd case
+        drawLines(fb, line_ptr, lx, rx, CBdx, CAdx, fix14_to_int(CBh), color);
+        drawLines(fb, line_ptr, lx, rx, BAdx, CAdx, fix14_to_int(CAh - CBh), color);
     }
-}
-
-IWRAM_CODE ARM_CODE void rasterize(void* fb){
-    for (int i = 0; i < MAX_DEPTH; i++){
-        if(triangle_base_indicies[i] == 0) continue;
-
-        uint16_t index = triangle_base_indicies[i];
-        while(index != 0){
-            const auto& face = transformed_faces[index];
-            const auto& triangle = face.triangle;
-            const auto& color = face.color;
-            
-
-
-            index = face.next_index;
-        }
+    else {
+        drawLines(fb, line_ptr, lx, rx, CAdx, CBdx, fix14_to_int(CBh), color);
+        drawLines(fb, line_ptr, lx, rx, CAdx, BAdx, fix14_to_int(CAh - CBh), color);
     }
+
 }
 
 }

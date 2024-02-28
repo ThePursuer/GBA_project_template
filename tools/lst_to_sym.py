@@ -30,6 +30,8 @@ def convert_to_sym(input_file, output_file):
         with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
             for line in infile:
                 parts = line.strip().split()
+                if(parts[-1] in ["__ewram_start", "__eheap_start", "__end__", "__ewram_end", "__sbss_end__", "__sbss_start__", "__eheap_end", "__iwram_start", "__iwram_start__"]):
+                    continue
                 if len(parts) > 1:  # Ensure there's at least an address
                     address, symbol = process_line(parts)
                     outfile.write(f"{address} {symbol}\n")

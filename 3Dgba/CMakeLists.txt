@@ -5,7 +5,8 @@ project(3Dgba VERSION 0.1.0 LANGUAGES ASM CXX C)
 # Add the assembly files to the project
 set(
     ASM_FILES
-    asm/box/boxTranslate.s
+    asm/tonc_memcpy.s
+    asm/tonc_memset.s
 )
 
 set(
@@ -15,13 +16,13 @@ set(
     src/math/division_table_7_16.cpp
     src/math/division_table_14_32.cpp
 
-    src/box.cpp
     src/rasterize.cpp
     src/ui_overlay.cpp
 )
 
 # Create the library target
 add_library(3Dgba STATIC ${ASM_FILES} ${SRC_FILES})
+target_compile_options(3Dgba PUBLIC "-g")
 
 # Loop through ASM_FILES and set source file properties to "ASM"
 foreach(ASM_FILE ${ASM_FILES})

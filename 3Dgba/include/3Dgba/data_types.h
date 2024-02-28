@@ -7,124 +7,130 @@
 #include "3Dgba/math/fix7.h"
 #include "3Dgba/math/fix14.h"
 
-struct Vector3s_t
-{
-    int16_t x, y, z;
+template<template<typename...> class TT, typename T>
+struct is_instantiation_of : std::false_type { };
 
-    Vector3s_t operator+(const Vector3s_t& other) const
+template<template<typename...> class TT, typename... Ts>
+struct is_instantiation_of<TT, TT<Ts...>> : std::true_type { };
+
+template <typename T>
+struct Vector3 {
+    static_assert(std::is_arithmetic<T>::value, "Vector2 can only be used with arithmetic types");
+    T x, y, z;
+
+    inline Vector3 operator+(const Vector3& other) const
     {
         return { x + other.x, y + other.y, z + other.z };
     }
-
-    Vector3s_t operator-(const Vector3s_t& other) const
+    inline Vector3 operator-(const Vector3& other) const
     {
         return { x - other.x, y - other.y, z - other.z };
     }
-
-    bool operator==(const Vector3s_t& other) const
+    inline bool operator==(const Vector3& other) const
     {
         return x == other.x && y == other.y && z == other.z;
     }
-};
-
-struct Vector3i_t
-{
-    fix14_t x, y, z;
-
-    Vector3i_t operator+(const Vector3i_t& other) const
+    inline bool operator!=(const Vector3& other) const
     {
-        return { x + other.x, y + other.y, z + other.z };
+        return x != other.x || y != other.y || z != other.z;
     }
-
-    Vector3i_t operator-(const Vector3i_t& other) const
+    inline Vector3& operator=(const Vector3& other)
     {
-        return { x - other.x, y - other.y, z - other.z };
-    }
-
-    bool operator==(const Vector3i_t& other) const
-    {
-        return x == other.x && y == other.y && z == other.z;
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
     }
 };
 
-struct Vector2s_t
-{
-    fix7_t x, y;
+template <typename T>
+struct Vector2{
+    static_assert(std::is_arithmetic<T>::value, "Vector2 can only be used with arithmetic types");
+    static_assert(sizeof(T) <= sizeof(uint32_t), "Vector2 can only be used with types that are 32 bits or less in size.");
+    T x, y;
 
-    Vector2s_t operator+(const Vector2s_t& other) const
+    inline Vector2 operator+(const Vector2& other) const
     {
         return { x + other.x, y + other.y };
     }
-
-    Vector2s_t operator-(const Vector2s_t& other) const
+    inline Vector2 operator-(const Vector2& other) const
     {
         return { x - other.x, y - other.y };
     }
-
-    bool operator==(const Vector2s_t& other) const
+    inline bool operator==(const Vector2& other) const
     {
-        return x == other.x && y == other.y;
+        if constexpr (sizeof(T) == sizeof(uint32_t))
+            return *(uint64_t*)this == *(uint64_t*)&other;
+        else if constexpr (sizeof(T) == sizeof(uint16_t))
+            return *(uint32_t*)this == *(uint32_t*)&other;
+        else if constexpr (sizeof(T) == sizeof(uint8_t))
+            return *(uint16_t*)this == *(uint16_t*)&other;
     }
-};
-
-struct Vector2c_t{
-    int8_t x, y;
-
-    Vector2c_t operator+(const Vector2c_t& other) const
-    {
-        return { x + other.x, y + other.y };
-    }
-
-    Vector2c_t operator-(const Vector2c_t& other) const
-    {
-        return { x - other.x, y - other.y };
-    }
-
-    bool operator==(const Vector2c_t& other) const
-    {
-        return x == other.x && y == other.y;
-    }
-
-    bool operator!=(const Vector2c_t& other) const
+    inline bool operator!=(const Vector2& other) const
     {
         return x != other.x || y != other.y;
     }
-
-    Vector2c_t operator=(const Vector2c_t& other) const
+    
+    inline Vector2& operator=(const Vector2& other)
     {
-        return { other.x, other.y };
+        x = other.x;
+        y = other.y;
+        return *this;
+    }
+    inline bool operator<(const Vector2& other) const
+    {
+        if constexpr (sizeof(T) == sizeof(uint32_t))
+            return *(uint64_t*)this < *(uint64_t*)&other;
+        else if constexpr (sizeof(T) == sizeof(uint16_t))
+            return *(uint32_t*)this < *(uint32_t*)&other;
+        else if constexpr (sizeof(T) == sizeof(uint8_t))
+            return *(uint16_t*)this < *(uint16_t*)&other;
+    }
+    inline bool operator>(const Vector2& other) const
+    {
+        if constexpr (sizeof(T) == sizeof(uint32_t))
+            return *(uint64_t*)this > *(uint64_t*)&other;
+        else if constexpr (sizeof(T) == sizeof(uint16_t))
+            return *(uint32_t*)this > *(uint32_t*)&other;
+        else if constexpr (sizeof(T) == sizeof(uint8_t))
+            return *(uint16_t*)this > *(uint16_t*)&other;
+    }
+    inline bool operator<=(const Vector2& other) const
+    {
+        if constexpr (sizeof(T) == sizeof(uint32_t))
+            return *(uint64_t*)this <= *(uint64_t*)&other;
+        else if constexpr (sizeof(T) == sizeof(uint16_t))
+            return *(uint32_t*)this <= *(uint32_t*)&other;
+        else if constexpr (sizeof(T) == sizeof(uint8_t))
+            return *(uint16_t*)this <= *(uint16_t*)&other;
+    }
+    inline bool operator>=(const Vector2& other) const
+    {
+        if constexpr (sizeof(T) == sizeof(uint32_t))
+            return *(uint64_t*)this >= *(uint64_t*)&other;
+        else if constexpr (sizeof(T) == sizeof(uint16_t))
+            return *(uint32_t*)this >= *(uint32_t*)&other;
+        else if constexpr (sizeof(T) == sizeof(uint8_t))
+            return *(uint16_t*)this >= *(uint16_t*)&other;
     }
 };
 
-struct Vector2i_t
-{
-    fix14_t x, y;
+template <typename T>
+struct Triangle{
+    static_assert(is_instantiation_of<Vector2, T>::value, "Template must be of type Vector2 or Vector3");
+    std::array<T, 3> verticies;
+    short z;
 
-    Vector2i_t operator+(const Vector2i_t& other) const
-    {
-        return { x + other.x, y + other.y };
-    }
-
-    Vector2i_t operator-(const Vector2i_t& other) const
-    {
-        return { x - other.x, y - other.y };
-    }
-
-    bool operator==(const Vector2i_t& other) const
-    {
-        return x == other.x && y == other.y;
+    inline void sort(){
+        if(verticies[0] > verticies[1])
+            std::swap(verticies[0], verticies[1]);
+        if(verticies[0] > verticies[2])
+            std::swap(verticies[0], verticies[2]);
+        if(verticies[1] > verticies[2])
+            std::swap(verticies[1], verticies[2]);
     }
 };
 
-struct Triangle2Ds_t
-{
-     std::array<Vector2s_t, 3> verticies;
-};
-
-struct Triangle3Di_t
-{
-     std::array<Vector2i_t, 3> verticies;
-};
 
 // #define ALIGN4      __attribute__((aligned(4)))
 // #define ALIGN8      __attribute__((aligned(8)))

@@ -1,15 +1,17 @@
-#include <3Dgba/math/matrix.h>
-
 #include <iostream>
 
+#include <gba_os/QuickTimer.h>
+#include <gba_os/SimpleOutputStream.h>
+
 #include "3Dgba/math/math.h"
-#include "3Dgba/box3d.h"
-#include "gba_os/QuickTimer.h"
 #include "3Dgba/math/division_table_14_32.h"
+#include "3Dgba/math/matrix.h"
 
 #include "debug.h"
 
-bool matrixSetBasis_asm_test(std::stringstream& err){
+using namespace Gba_os::console;
+
+bool matrixSetBasis_test(SimpleOutputStream& err){
     Matrix m{}, n{};
     m.e00 = 1;
     m.e01 = 2;
@@ -38,7 +40,7 @@ bool matrixSetBasis_asm_test(std::stringstream& err){
     return false;
 }
 
-bool matrixLerp_test(std::stringstream& err){
+bool matrixLerp_test(SimpleOutputStream& err){
     // todo: finish this
     Matrix m{}, n{};
     m.e00 = int_to_fix14(1); m.e01 = int_to_fix14(2); m.e02 = int_to_fix14(3); m.e03 = int_to_fix14(0);
@@ -56,9 +58,19 @@ bool matrixLerp_test(std::stringstream& err){
     matrixLinearInterpolation(m, n, 5461);
     time = stopTimer();
    
-
-    err << "New implementation took " << time << " nanoseconds" << std::endl;
-    err << matrix_to_string(m) << std::endl;
+    bool pass = fix14_to_int(m.e00) == 3 && fix14_to_int(m.e01) == 4 && fix14_to_int(m.e02) == 5 &&
+                fix14_to_int(m.e10) == 6 && fix14_to_int(m.e11) == 7 && fix14_to_int(m.e12) == 8 &&
+                fix14_to_int(m.e20) == 9 && fix14_to_int(m.e21) == 10 && fix14_to_int(m.e22) == 11;
     
-    return false;
+    if(!pass){
+        err << "got:" << std::endl;
+        err << matrix_to_string_raw(m) << std::endl;
+        err << "expected:" << std::endl;
+        err << "3 4 5" << std::endl;
+        err << "6 7 8" << std::endl;
+        err << "9 10 11" << std::endl;
+        return false;
+    }
+    
+    return true;
 }

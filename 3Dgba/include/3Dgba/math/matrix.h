@@ -62,7 +62,7 @@ extern "C" {
 // Function declarations
 void matrixLerp_c(const Matrix &n, Matrix&m, int32_t pmul, int32_t pdiv);
 void matrixTranslateRel_c(Matrix &m, int32_t x, int32_t y, int32_t z);
-void matrixTranslateAbs_c(Matrix& m, Vector3i_t& cameraPos, int32_t x, int32_t y, int32_t z);
+void matrixTranslateAbs_c(Matrix& m, Vector3<fix14_t>& cameraPos, int32_t x, int32_t y, int32_t z);
 void matrixTranslateSet_c(Matrix &m, int32_t x, int32_t y, int32_t z);
 void matrixRotateX_c(Matrix &m, int32_t angle);
 void matrixRotateY_c(Matrix &m, int32_t angle);
