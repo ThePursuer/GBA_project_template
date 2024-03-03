@@ -41,7 +41,7 @@ public:
 
 class SpriteComponent: public Component {
 public:
-    std::unique_ptr<Sprite> sprite;
+    std::unique_ptr<SpriteMine> sprite;
     bool needs_update = true;
 };
 

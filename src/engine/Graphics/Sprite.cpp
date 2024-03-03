@@ -1,6 +1,6 @@
 #include "Sprite.h"
 
-Sprite::Sprite(u16 attr0, u16 attr1, u16 attr2, u32 id, const Position& position)
+SpriteMine::SpriteMine(u16 attr0, u16 attr1, u16 attr2, u32 id, const Position& position)
     : position_(position), id_(id), spriteAttr0_(attr0), spriteAttr1_(attr1), spriteAttr2_(attr2) {
         auto shape = (spriteAttr0_ >> 14) & 0b11;
         auto size = (spriteAttr1_ >> 14) & 0b11;
@@ -22,22 +22,22 @@ Sprite::Sprite(u16 attr0, u16 attr1, u16 attr2, u32 id, const Position& position
         }
 }
 
-Sprite::~Sprite(){
+SpriteMine::~SpriteMine(){
     memset(&OAM[id_].attr0, 0, 6);
 }
 
-void Sprite::update() {
+void SpriteMine::update() {
     // Update the sprite's OAM data
     OAM[id_].attr0 = spriteAttr0_ | (getY() & 0xFF);
     OAM[id_].attr1 = spriteAttr1_ | (getX() & 0x1FF);
     OAM[id_].attr2 = spriteAttr2_ | (sprite_index_ & 0x3FF);
 }
 
-void Sprite::setGFXIndex(u32 index) {
+void SpriteMine::setGFXIndex(u32 index) {
     sprite_index_ = index;
 }
 
-void Sprite::flipX(bool val){
+void SpriteMine::flipX(bool val){
     if (val) {
         spriteAttr1_ |= (1 << 12);
     } else {
@@ -45,7 +45,7 @@ void Sprite::flipX(bool val){
     }
 }
 
-void Sprite::flipY(bool val){
+void SpriteMine::flipY(bool val){
     if (val) {
         spriteAttr1_ |= (1 << 13);
     } else {

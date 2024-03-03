@@ -38,4 +38,4 @@ private:
     std::unordered_map<u32, std::pair<void*, u32>> mappedSprites;
 };
 
-void setAnimationFrames(u32 baseAnimationIndex, Sprite& sprite, AnimationClip& clip);
+void setAnimationFrames(u32 baseAnimationIndex, SpriteMine& sprite, AnimationClip& clip);

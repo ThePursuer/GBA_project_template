@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.14)
+
 file(GLOB WAV_MOD_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.wav" "${CMAKE_CURRENT_SOURCE_DIR}/*.mod")
 
 set(MMOUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/.dkp-generated/soundbank.bin")

@@ -8,11 +8,11 @@
 
 #include "engine/ECS/Interface.h"
 
-class Sprite {
+class SpriteMine {
 public:
-    Sprite(u16 attr0, u16 attr1, u16 attr2, u32 id, const Position& position);
+    SpriteMine(u16 attr0, u16 attr1, u16 attr2, u32 id, const Position& position);
 
-    ~Sprite(); // Removes OAM entry
+    ~SpriteMine(); // Removes OAM entry
     void update();
     void setGFXIndex(u32 index);
     const s32 getX() const {return position_.getX();}

@@ -59,7 +59,7 @@ Entity generatePlayer(EntityManager & manager){
     }
 
     std::shared_ptr<SpriteComponent> player_sprite = std::make_shared<SpriteComponent>();
-    player_sprite->sprite = std::make_unique<Sprite>(ATTR0_COLOR_16 | ATTR0_NORMAL | ATTR0_SQUARE,
+    player_sprite->sprite = std::make_unique<SpriteMine>(ATTR0_COLOR_16 | ATTR0_NORMAL | ATTR0_SQUARE,
         ATTR1_SIZE_32,
         ATTR2_PRIORITY(0) | ATTR2_PALETTE(0),
         1,
@@ -102,7 +102,7 @@ Entity generateBox(EntityManager & manager, u32 x, u32 y, u32 oam_id){
     positionComponent->superPositionY = y;
 
     std::shared_ptr<SpriteComponent> boxSprite = std::make_shared<SpriteComponent>();
-    boxSprite->sprite = std::make_unique<Sprite>(ATTR0_COLOR_16 | ATTR0_NORMAL | ATTR0_SQUARE,
+    boxSprite->sprite = std::make_unique<SpriteMine>(ATTR0_COLOR_16 | ATTR0_NORMAL | ATTR0_SQUARE,
         ATTR1_SIZE_32,
         ATTR2_PRIORITY(0) | ATTR2_PALETTE(1),
         oam_id,
@@ -261,8 +261,9 @@ int main() {
         auto now = clock.now();
         auto delta = std::chrono::duration_cast<gba_microseconds>(now - last_frame_time);
         last_frame_time = now;
+    
         systemManager.updateAllSystems(entityManager, delta);
-        cpSpaceStep(space, (std::chrono::duration_cast<gba_milliseconds>(delta).count() / cpFloat(1000.0)));
+        cpSpaceStep(space, (int_to_fix14(std::chrono::duration_cast<gba_milliseconds>(delta).count()) / 1000));
 
         auto deltad = clock.now() - now;
         if(count % 10 == 0){

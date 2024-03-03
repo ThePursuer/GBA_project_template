@@ -1,0 +1,27 @@
+{
+    "configurations": [
+        {
+            "name": "(gdb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "targetArchitecture": "arm",
+            "program": "${workspaceFolder}/build/3Dgba/test/3Dgba_unit_test.elf",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerServerAddress": "localhost:2345",
+            "windows": {
+                "miDebuggerPath": "C:\\devkitpro\\devkitARM\\bin\\arm-none-eabi-gdb.exe",
+                "setupCommands": [
+                    {
+                        // "text": "shell start /b \"\" \"C:\\Users\\peter\\Development\\mgba-0.10.3\\build-win64\\mGBA.exe\" -g \"${workspaceFolder}\\build\\src\\my_gba_executable.elf\""
+                        "text": "shell start /b \"\" \"C:\\Users\\peter\\Development\\mgba-0.10.3\\build-win64\\mGBA.exe\" -g \"${workspaceFolder}\\build\\3Dgba\\test\\3Dgba_unit_test.elf\""
+                    }
+                ]
+            }
+        }
+    ]
+}

@@ -56,6 +56,20 @@
         "sstream": "cpp",
         "stdexcept": "cpp",
         "streambuf": "cpp",
-        "typeinfo": "cpp"
-    }
+        "typeinfo": "cpp",
+        "bitset": "cpp",
+        "charconv": "cpp",
+        "cstring": "cpp",
+        "set": "cpp",
+        "unordered_set": "cpp",
+        "optional": "cpp",
+        "format": "cpp",
+        "iomanip": "cpp",
+        "iostream": "cpp",
+        "span": "cpp",
+        "variant": "cpp"
+    },
+    "C_Cpp.default.includePath": [
+        "C:\\Users\\peter\\Development\\Chipmunk2D\\include"
+    ]
 }

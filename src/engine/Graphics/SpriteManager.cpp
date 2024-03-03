@@ -29,7 +29,7 @@ void SpriteManager::unloadSprite(u32 handle){
     mappedSprites.erase(handle);
 }
 
-void setAnimationFrames(u32 baseAnimationIndex, Sprite& sprite, AnimationClip& clip){
+void setAnimationFrames(u32 baseAnimationIndex, SpriteMine& sprite, AnimationClip& clip){
     clip.frames.clear();
     for(int i = baseAnimationIndex; i < (clip.frameCount * sprite.getObjIndexIncrement() + baseAnimationIndex); i+= sprite.getObjIndexIncrement())
         clip.frames.push_back(i);
